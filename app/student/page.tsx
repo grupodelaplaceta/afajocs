@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Library, LogOut, Trophy } from "lucide-react";
+import { BookOpen, Library, LogOut, Trophy } from "lucide-react";
 import { getStudentByUserIdOrEmail, requireUser } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
-import { Game, GameAttempt, StudentGameRecord } from "@/lib/models";
+import { Challenge, Game, GameAttempt, StudentGameRecord } from "@/lib/models";
 import { BrandLogo } from "@/components/BrandLogo";
 
 function asPlain(value: unknown): any {
@@ -33,7 +33,7 @@ export default async function StudentPage() {
     );
   }
 
-  const [games, attempts, records] = await Promise.all([
+  const [games, attempts, records, challenges] = await Promise.all([
     Game.find({
       gradeMin: { $lte: student.gradeLevel },
       gradeMax: { $gte: student.gradeLevel },
@@ -43,12 +43,17 @@ export default async function StudentPage() {
       .sort({ createdAt: -1 })
       .lean(),
     GameAttempt.find({ studentId: student._id }).sort({ createdAt: -1 }).limit(10).lean(),
-    StudentGameRecord.find({ studentId: student._id }).populate("gameId", "title").lean()
+    StudentGameRecord.find({ studentId: student._id }).populate("gameId", "title").lean(),
+    Challenge.find({ studentIds: student._id, isActive: true })
+      .populate("gameIds", "title subject type isDeleted isPublished")
+      .sort({ createdAt: -1 })
+      .lean()
   ]);
 
-  const data = asPlain({ games, attempts, records });
+  const data = asPlain({ games, attempts, records, challenges });
   const totalScore = data.attempts.reduce((sum: number, attempt: { score?: number }) => sum + (attempt.score || 0), 0);
   const bestScore = data.attempts.reduce((best: number, attempt: { score?: number }) => Math.max(best, attempt.score || 0), 0);
+  const doneGameIds = new Set(data.attempts.map((attempt: { gameId: string }) => String(attempt.gameId)));
 
   return (
     <main className="page">
@@ -89,7 +94,45 @@ export default async function StudentPage() {
           </article>
         </section>
 
-        <section className="grid grid-2" style={{ marginTop: 18 }}>
+        <div className="student-tabs" style={{ marginTop: 18 }}>
+          <input id="student-tab-deures" name="student-tab" type="radio" defaultChecked />
+          <input id="student-tab-jocs" name="student-tab" type="radio" />
+          <input id="student-tab-punts" name="student-tab" type="radio" />
+          <nav className="tabs" aria-label="Seccions alumne">
+            <label className="tab" htmlFor="student-tab-deures"><BookOpen size={18} /> Els meus deures</label>
+            <label className="tab" htmlFor="student-tab-jocs"><Library size={18} /> Jocs</label>
+            <label className="tab" htmlFor="student-tab-punts"><Trophy size={18} /> Punts</label>
+          </nav>
+
+          <section className="tab-panel student-tab-content student-deures panel">
+            <h2>Els meus deures</h2>
+            <p className="muted">Reptes encomanats pel professorat.</p>
+            <div className="game-card-grid" style={{ marginTop: 18 }}>
+              {data.challenges.map((challenge: any) => (
+                <article className="game-card" key={challenge._id}>
+                  <span className="badge orange">Repte</span>
+                  <h3>{challenge.title}</h3>
+                  <p className="muted">{challenge.description || "Completa els jocs assignats."}</p>
+                  <div className="list">
+                    {(challenge.gameIds || [])
+                      .filter((game: any) => game && !game.isDeleted && game.isPublished)
+                      .map((game: any) => (
+                        <div className="row" key={game._id}>
+                          <div>
+                            <strong>{game.title}</strong>
+                            <div className="muted">{game.subject} · {doneGameIds.has(String(game._id)) ? "fet" : "pendent"}</div>
+                          </div>
+                          <Link className="button" href={`/play/${game._id}`}>Jugar</Link>
+                        </div>
+                      ))}
+                  </div>
+                </article>
+              ))}
+              {data.challenges.length === 0 && <p className="muted">Encara no tens deures assignats.</p>}
+            </div>
+          </section>
+
+          <section className="tab-panel student-tab-content student-jocs grid grid-2">
           <div className="panel">
             <h2>Jocs</h2>
             <div className="list" style={{ marginTop: 14 }}>
@@ -106,7 +149,9 @@ export default async function StudentPage() {
               ))}
             </div>
           </div>
+          </section>
 
+          <section className="tab-panel student-tab-content student-punts grid grid-2">
           <div className="panel">
             <h2>Rècords</h2>
             <div className="list" style={{ marginTop: 14 }}>
@@ -140,7 +185,8 @@ export default async function StudentPage() {
               {data.attempts.length === 0 && <p className="muted">Encara no hi ha puntuacions.</p>}
             </div>
           </div>
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );

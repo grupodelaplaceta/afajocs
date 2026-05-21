@@ -416,11 +416,16 @@ p {
 }
 
 #tab-resumen:checked ~ .tabs label[for="tab-resumen"],
+#tab-quadern:checked ~ .tabs label[for="tab-quadern"],
+#tab-reptes:checked ~ .tabs label[for="tab-reptes"],
 #tab-clases:checked ~ .tabs label[for="tab-clases"],
 #tab-alumnos:checked ~ .tabs label[for="tab-alumnos"],
 #tab-crear:checked ~ .tabs label[for="tab-crear"],
 #tab-importar:checked ~ .tabs label[for="tab-importar"],
-#tab-publicados:checked ~ .tabs label[for="tab-publicados"] {
+#tab-publicados:checked ~ .tabs label[for="tab-publicados"],
+#student-tab-deures:checked ~ .tabs label[for="student-tab-deures"],
+#student-tab-jocs:checked ~ .tabs label[for="student-tab-jocs"],
+#student-tab-punts:checked ~ .tabs label[for="student-tab-punts"] {
   background: var(--brand-black);
   border-color: var(--brand-cyan);
   color: var(--brand-white);
@@ -435,6 +440,7 @@ p {
 }
 
 #tab-resumen:checked ~ .tab-panels .tab-resumen,
+#tab-quadern:checked ~ .tab-panels .tab-quadern,
 #tab-crear:checked ~ .tab-panels .tab-crear,
 #tab-publicados:checked ~ .tab-panels .tab-publicados {
   display: block;
@@ -442,7 +448,27 @@ p {
 
 #tab-clases:checked ~ .tab-panels .tab-clases,
 #tab-alumnos:checked ~ .tab-panels .tab-alumnos,
+#tab-reptes:checked ~ .tab-panels .tab-reptes,
 #tab-importar:checked ~ .tab-panels .tab-importar {
+  display: grid;
+}
+
+.student-tabs > input {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.student-tab-content {
+  display: none;
+}
+
+#student-tab-deures:checked ~ .student-deures {
+  display: block;
+}
+
+#student-tab-jocs:checked ~ .student-jocs,
+#student-tab-punts:checked ~ .student-punts {
   display: grid;
 }
 

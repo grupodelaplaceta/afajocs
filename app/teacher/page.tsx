@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen,
+  ClipboardList,
   FileJson,
   Gamepad2,
   GraduationCap,
@@ -14,6 +15,8 @@ import {
 import { requireUser, getTeacherByUserId } from "@/lib/auth";
 import {
   createClassAction,
+  closeChallengeAction,
+  createChallengeAction,
   deleteClassAction,
   createGameAction,
   createStudentAction,
@@ -24,7 +27,7 @@ import {
 } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { aiGamePrompt } from "@/lib/game-import";
-import { ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
+import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
 import { AiPromptBox } from "@/components/AiPromptBox";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -34,6 +37,8 @@ function asPlain(value: unknown): any {
 
 const tabs = [
   { id: "resumen", label: "Resum", icon: Play },
+  { id: "quadern", label: "Quadern", icon: ClipboardList },
+  { id: "reptes", label: "Reptes", icon: Gamepad2 },
   { id: "clases", label: "Grups", icon: GraduationCap },
   { id: "alumnos", label: "Alumnes", icon: Users },
   { id: "crear", label: "Crear joc", icon: Gamepad2 },
@@ -55,7 +60,7 @@ export default async function TeacherPage() {
     return <main className="page">No se encontro perfil docente.</main>;
   }
 
-  const [classes, students, games, attempts, records, studentStats] = await Promise.all([
+  const [classes, students, games, attempts, records, studentStats, challenges] = await Promise.all([
     ClassGroup.find({ teacherId: teacher._id }).sort({ createdAt: -1 }).lean(),
     Student.find({ teacherOwnerId: teacher._id }).sort({ createdAt: -1 }).lean(),
     Game.find({ teacherId: teacher._id, isDeleted: { $ne: true } }).sort({ createdAt: -1 }).lean(),
@@ -77,11 +82,23 @@ export default async function TeacherPage() {
           bestScore: { $max: "$score" }
         }
       }
-    ])
+    ]),
+    Challenge.find({ teacherId: teacher._id, isActive: true })
+      .populate("gameIds", "title subject isDeleted isPublished")
+      .populate("studentIds", "name email gradeLevel")
+      .sort({ createdAt: -1 })
+      .lean()
   ]);
 
-  const data = asPlain({ classes, students, games, attempts, records, studentStats });
+  const data = asPlain({ classes, students, games, attempts, records, studentStats, challenges });
   const statsByStudent = new Map(data.studentStats.map((stat: any) => [String(stat._id), stat]));
+  const attemptsByStudent = new Map<string, Set<string>>();
+  data.attempts.forEach((attempt: any) => {
+    const studentId = String(attempt.studentId);
+    const gamesSet = attemptsByStudent.get(studentId) || new Set<string>();
+    gamesSet.add(String(attempt.gameId));
+    attemptsByStudent.set(studentId, gamesSet);
+  });
 
   return (
     <main className="page">
@@ -129,6 +146,18 @@ export default async function TeacherPage() {
             <section className="tab-panel tab-content tab-resumen">
             <div className="grid grid-3">
               <article className="card stat">
+                <h2>1</h2>
+                <p className="muted">Crea o importa un joc</p>
+              </article>
+              <article className="card stat cyan">
+                <h2>2</h2>
+                <p className="muted">Organitza'l en un repte</p>
+              </article>
+              <article className="card stat orange">
+                <h2>3</h2>
+                <p className="muted">Segueix-ho al quadern</p>
+              </article>
+              <article className="card stat">
                 <Users color="#c000d8" />
                 <h2>{data.students.length}</h2>
                 <p className="muted">Alumnes</p>
@@ -143,6 +172,101 @@ export default async function TeacherPage() {
                 <h2>{data.attempts.length}</h2>
                 <p className="muted">Partides recents</p>
               </article>
+            </div>
+          </section>
+
+          <section className="tab-panel tab-content tab-quadern panel">
+            <h2>Quadern del professor</h2>
+            <p className="muted">Vista ràpida d'alumnes, punts, jocs fets i deures assignats.</p>
+            <div className="list" style={{ marginTop: 18 }}>
+              {data.students.map((student: { _id: string; name: string; email: string; gradeLevel: number }) => {
+                const stats = statsByStudent.get(student._id) as any;
+                const assigned = data.challenges.filter((challenge: any) =>
+                  challenge.studentIds?.some((item: any) => String(item._id) === student._id)
+                );
+                const doneGames = attemptsByStudent.get(student._id)?.size || 0;
+                return (
+                  <article className="row" key={student._id}>
+                    <div>
+                      <strong>{student.name}</strong>
+                      <div className="muted">{student.email} · {student.gradeLevel}º</div>
+                      <div className="muted">
+                        {stats?.totalScore || 0} punts · {stats?.attempts || 0} partides · {doneGames} jocs fets
+                      </div>
+                    </div>
+                    <div className="toolbar">
+                      <span className="badge cyan">{assigned.length} reptes</span>
+                      <span className="badge orange">millor {stats?.bestScore || 0}</span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="tab-panel tab-content tab-reptes grid grid-2">
+            <div className="panel">
+              <h2>Crear repte / deures</h2>
+              <p className="muted">Tria jocs, tria alumnes i publica-ho a “Els meus deures”.</p>
+              <form className="form" action={createChallengeAction}>
+                <div className="field">
+                  <label>Títol del repte</label>
+                  <input name="title" placeholder="Repte de lectura de la setmana" required />
+                </div>
+                <div className="field">
+                  <label>Descripció</label>
+                  <textarea name="description" placeholder="Fes aquests jocs abans de divendres." />
+                </div>
+                <div className="field">
+                  <label>Data límit</label>
+                  <input name="dueDate" type="date" />
+                </div>
+                <div className="field">
+                  <label>Jocs del repte</label>
+                  <div className="choice-grid">
+                    {data.games.map((game: { _id: string; title: string }) => (
+                      <label className="choice" key={game._id}>
+                        <input name="gameIds" type="checkbox" value={game._id} />
+                        <span>{game.title}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="field">
+                  <label>Alumnes</label>
+                  <div className="choice-grid">
+                    {data.students.map((student: { _id: string; name: string }) => (
+                      <label className="choice" key={student._id}>
+                        <input name="studentIds" type="checkbox" value={student._id} />
+                        <span>{student.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <button className="button secondary" type="submit">Encomanar deures</button>
+              </form>
+            </div>
+
+            <div className="panel">
+              <h2>Reptes actius</h2>
+              <div className="list" style={{ marginTop: 14 }}>
+                {data.challenges.map((challenge: any) => (
+                  <article className="inline-edit-form" key={challenge._id}>
+                    <div>
+                      <strong>{challenge.title}</strong>
+                      <p className="muted">{challenge.description || "Sense descripció"}</p>
+                      <div className="muted">
+                        {challenge.gameIds?.length || 0} jocs · {challenge.studentIds?.length || 0} alumnes
+                      </div>
+                    </div>
+                    <form action={closeChallengeAction}>
+                      <input type="hidden" name="challengeId" value={challenge._id} />
+                      <button className="button ghost" type="submit">Tancar repte</button>
+                    </form>
+                  </article>
+                ))}
+                {data.challenges.length === 0 && <p className="muted">Encara no hi ha reptes actius.</p>}
+              </div>
             </div>
           </section>
 

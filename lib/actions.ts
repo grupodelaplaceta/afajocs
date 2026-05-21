@@ -8,7 +8,7 @@ import { connectDb } from "@/lib/db";
 import { demoGameContent } from "@/lib/demo-content";
 import { parseImportedGame } from "@/lib/game-import";
 import { calculateScore } from "@/lib/scoring";
-import { ClassGroup, Game, GameAttempt, Student, StudentGameRecord, Teacher, User } from "@/lib/models";
+import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord, Teacher, User } from "@/lib/models";
 
 const authSchema = z.object({
   name: z.string().min(2).max(160).optional(),
@@ -287,6 +287,66 @@ export async function deleteGameAction(formData: FormData) {
   revalidatePath("/teacher");
   revalidatePath("/games");
   revalidatePath(`/games/${gameId}`);
+}
+
+const challengeSchema = z.object({
+  title: z.string().min(3).max(140),
+  description: z.string().max(500).optional(),
+  gameIds: z.array(z.string().min(1)).min(1),
+  studentIds: z.array(z.string().min(1)).min(1),
+  dueDate: z.string().optional()
+});
+
+export async function createChallengeAction(formData: FormData) {
+  const session = await requireUser("teacher");
+  const parsed = challengeSchema.parse({
+    title: formData.get("title"),
+    description: String(formData.get("description") || ""),
+    gameIds: formData.getAll("gameIds"),
+    studentIds: formData.getAll("studentIds"),
+    dueDate: String(formData.get("dueDate") || "")
+  });
+  const teacher = await getTeacherByUserId(session.id);
+  if (!teacher) {
+    throw new Error("Perfil de professor no trobat.");
+  }
+
+  const validGames = await Game.find({
+    _id: { $in: parsed.gameIds },
+    teacherId: teacher._id,
+    isDeleted: { $ne: true },
+    isPublished: true
+  }).select("_id");
+  const validStudents = await Student.find({
+    _id: { $in: parsed.studentIds },
+    teacherOwnerId: teacher._id
+  }).select("_id");
+
+  await Challenge.create({
+    teacherId: teacher._id,
+    title: parsed.title,
+    description: parsed.description || "",
+    gameIds: validGames.map((game) => game._id),
+    studentIds: validStudents.map((student) => student._id),
+    dueDate: parsed.dueDate ? new Date(parsed.dueDate) : undefined
+  });
+
+  revalidatePath("/teacher");
+  revalidatePath("/student");
+}
+
+export async function closeChallengeAction(formData: FormData) {
+  const session = await requireUser("teacher");
+  const challengeId = z.string().min(1).parse(formData.get("challengeId"));
+  const teacher = await getTeacherByUserId(session.id);
+  if (!teacher) {
+    throw new Error("Perfil de professor no trobat.");
+  }
+
+  await Challenge.findOneAndUpdate({ _id: challengeId, teacherId: teacher._id }, { isActive: false });
+
+  revalidatePath("/teacher");
+  revalidatePath("/student");
 }
 
 const attemptSchema = z.object({

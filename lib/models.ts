@@ -102,6 +102,19 @@ const recordSchema = new Schema(
 
 recordSchema.index({ studentId: 1, gameId: 1 }, { unique: true });
 
+const challengeSchema = new Schema(
+  {
+    teacherId: { type: Schema.Types.ObjectId, ref: "Teacher", required: true },
+    title: { type: String, required: true, trim: true },
+    description: { type: String, default: "" },
+    gameIds: [{ type: Schema.Types.ObjectId, ref: "Game" }],
+    studentIds: [{ type: Schema.Types.ObjectId, ref: "Student" }],
+    dueDate: { type: Date },
+    isActive: { type: Boolean, default: true }
+  },
+  { timestamps: true }
+);
+
 export type UserDoc = InferSchemaType<typeof userSchema>;
 export type TeacherDoc = InferSchemaType<typeof teacherSchema>;
 export type StudentDoc = InferSchemaType<typeof studentSchema>;
@@ -109,6 +122,7 @@ export type ClassDoc = InferSchemaType<typeof classSchema>;
 export type GameDoc = InferSchemaType<typeof gameSchema>;
 export type AttemptDoc = InferSchemaType<typeof attemptSchema>;
 export type RecordDoc = InferSchemaType<typeof recordSchema>;
+export type ChallengeDoc = InferSchemaType<typeof challengeSchema>;
 
 export const User = (models.User as Model<UserDoc>) || model("User", userSchema);
 export const Teacher = (models.Teacher as Model<TeacherDoc>) || model("Teacher", teacherSchema);
@@ -120,3 +134,4 @@ export const GameAttempt =
 export const StudentGameRecord =
   (models.StudentGameRecord as Model<RecordDoc>) ||
   model("StudentGameRecord", recordSchema);
+export const Challenge = (models.Challenge as Model<ChallengeDoc>) || model("Challenge", challengeSchema);
