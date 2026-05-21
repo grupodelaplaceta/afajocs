@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Gamepad2, GraduationCap, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { BrandLogo } from "@/components/BrandLogo";
+import { JicGuide } from "@/components/JicGuide";
 
 export default async function HomePage() {
   const session = await getSession();
@@ -22,7 +23,7 @@ export default async function HomePage() {
                   Inicia sessió
                 </Link>
                 <Link className="button secondary" href="/games">
-                  Jocs
+                  Jics
                 </Link>
                 <Link className="button" href="/register">
                   Crear compte
@@ -34,7 +35,7 @@ export default async function HomePage() {
 
         <section className="hero">
           <p className="eyebrow">JClic per dins, energia Kahoot per fora</p>
-          <h1>Activitats educatives amb rècord personal per a primària.</h1>
+          <h1>Jics educatius amb rècord personal per a primària.</h1>
           <p className="muted" style={{ maxWidth: 680 }}>
             El professorat crea grups, l'alumnat juga a l'aula o des de casa, i cada partida
             desa encerts, temps, puntuació i rècords amb la paleta AFA.
@@ -44,11 +45,16 @@ export default async function HomePage() {
           </Link>
         </section>
 
+        <JicGuide
+          tone="cyan"
+          message="Hola! Soc en Jic. T'acompanyaré per triar activitats, escoltar instruccions i saber què toca fer a cada pantalla."
+        />
+
         <section className="grid grid-3" style={{ marginTop: 18 }}>
           <article className="card stat">
             <GraduationCap color="#c000d8" />
             <h3>Panell docent</h3>
-            <p className="muted">Grups, alumnes, jocs i seguiment de resultats.</p>
+            <p className="muted">Grups, alumnes, Jics i seguiment de resultats.</p>
           </article>
           <article className="card stat cyan">
             <Gamepad2 color="#18a0e8" />

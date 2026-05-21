@@ -5,6 +5,7 @@ import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Challenge, Game, GameAttempt, StudentGameRecord } from "@/lib/models";
 import { TopNav } from "@/components/TopNav";
+import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -61,13 +62,18 @@ export default async function StudentPage() {
         <TopNav
           session={session}
           title="Panell alumne"
-          subtitle={`Hola, ${student.name}. Els teus jocs i rècords viuen aquí.`}
+          subtitle={`Hola, ${student.name}. Els teus Jics i rècords viuen aquí.`}
+        />
+
+        <JicGuide
+          tone="cyan"
+          message={`Hola, ${student.name}! Soc en Jic. Mira els teus deures, tria un Jic i jo t'ajudaré amb instruccions i veu quan juguis.`}
         />
 
         <section className="grid grid-3">
           <article className="card stat">
             <h2>{data.games.length}</h2>
-            <p className="muted">Jocs disponibles</p>
+            <p className="muted">Jics disponibles</p>
           </article>
           <article className="card stat cyan">
             <h2>{data.attempts.length}</h2>
@@ -89,7 +95,7 @@ export default async function StudentPage() {
           <input id="student-tab-punts" name="student-tab" type="radio" />
           <nav className="tabs" aria-label="Seccions alumne">
             <label className="tab" htmlFor="student-tab-deures"><BookOpen size={18} /> Els meus deures</label>
-            <label className="tab" htmlFor="student-tab-jocs"><Library size={18} /> Jocs</label>
+            <label className="tab" htmlFor="student-tab-jocs"><Library size={18} /> Jics</label>
             <label className="tab" htmlFor="student-tab-punts"><Trophy size={18} /> Punts</label>
           </nav>
 
@@ -101,7 +107,7 @@ export default async function StudentPage() {
                 <article className="game-card" key={challenge._id}>
                   <span className="badge orange">Repte</span>
                   <h3>{challenge.title}</h3>
-                  <p className="muted">{challenge.description || "Completa els jocs assignats."}</p>
+                  <p className="muted">{challenge.description || "Completa els Jics assignats."}</p>
                   <div className="list">
                     {(challenge.gameIds || [])
                       .filter((game: any) => game && !game.isDeleted && game.isPublished)
@@ -123,7 +129,7 @@ export default async function StudentPage() {
 
           <section className="tab-panel student-tab-content student-jocs grid grid-2">
           <div className="panel">
-            <h2>Jocs</h2>
+            <h2>Jics</h2>
             <div className="list" style={{ marginTop: 14 }}>
               {data.games.map((game: { _id: string; title: string; subject: string; type: string }) => (
                 <div className="row" key={game._id}>
@@ -148,7 +154,7 @@ export default async function StudentPage() {
                 <article className="record-row" key={record._id}>
                   <div className="record-rank">{index + 1}</div>
                   <div className="record-main">
-                    <strong>{record.gameId?.title || "joc eliminat"}</strong>
+                    <strong>{record.gameId?.title || "Jic eliminat"}</strong>
                     <p className="muted">Millor temps: {record.bestTimeSeconds}s</p>
                   </div>
                   <span className="score-pill"><Trophy size={14} /> {record.bestScore} pts</span>
@@ -164,7 +170,7 @@ export default async function StudentPage() {
               {data.attempts.map((attempt: { _id: string; score: number; timeSpentSeconds: number; gameTitleSnapshot?: string }) => (
                 <div className="row" key={attempt._id}>
                   <div>
-                    <strong>{attempt.gameTitleSnapshot || "joc eliminat"}</strong>
+                    <strong>{attempt.gameTitleSnapshot || "Jic eliminat"}</strong>
                     <div className="muted">{attempt.timeSpentSeconds}s</div>
                   </div>
                   <span className="badge orange">{attempt.score} punts</span>

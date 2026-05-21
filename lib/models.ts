@@ -65,7 +65,7 @@ const gameSchema = new Schema(
 const attemptSchema = new Schema(
   {
     gameId: { type: Schema.Types.ObjectId, ref: "Game", required: true },
-    gameTitleSnapshot: { type: String, default: "joc eliminat" },
+    gameTitleSnapshot: { type: String, default: "Jic eliminat" },
     studentId: { type: Schema.Types.ObjectId, ref: "Student", required: true },
     teacherId: { type: Schema.Types.ObjectId, ref: "Teacher" },
     mode: { type: String, required: true, enum: ["classroom", "remote"] },

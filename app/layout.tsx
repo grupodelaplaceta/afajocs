@@ -10,7 +10,7 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "AFAJICS",
-  description: "Plataforma educativa gamificada para primaria"
+  description: "Plataforma educativa gamificada de Jics para primaria"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

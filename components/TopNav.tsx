@@ -26,7 +26,7 @@ export function TopNav({
           <Home size={18} /> Inici
         </Link>
         <Link className="button black" href="/games">
-          <Library size={18} /> Biblioteca
+          <Library size={18} /> Biblioteca de Jics
         </Link>
         {session?.role === "student" && (
           <Link className="button cyan" href="/student">
@@ -53,4 +53,3 @@ export function TopNav({
     </header>
   );
 }
-

@@ -5,6 +5,7 @@ import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { getGameRecordViews } from "@/lib/record-views";
 import { TopNav } from "@/components/TopNav";
+import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -32,7 +33,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
 
   const game = await Game.findById(gameId).lean();
   if (!game || game.isDeleted) {
-    return <main className="page">Joc no trobat.</main>;
+    return <main className="page">Jic no trobat.</main>;
   }
 
   let teacherId: unknown = undefined;
@@ -56,7 +57,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
   return (
     <main className="page">
       <div className="shell">
-        <TopNav session={session} title="Detall de l'activitat" subtitle="Consulta rècords abans de jugar." />
+        <TopNav session={session} title="Detall del Jic" subtitle="Consulta rècords abans de jugar." />
 
         <section className="hero animate-in">
           <p className="eyebrow">{data.game.subject}</p>
@@ -74,6 +75,11 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
             </span>
           </div>
         </section>
+
+        <JicGuide
+          compact
+          message="Abans de començar pots mirar el rècord global, el teu rècord i els millors resultats per grup."
+        />
 
         <section className="record-grid" style={{ marginTop: 18 }}>
           <article className="record-card featured">

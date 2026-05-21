@@ -28,6 +28,7 @@ import { aiGamePrompt } from "@/lib/game-import";
 import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
 import { AiPromptBox } from "@/components/AiPromptBox";
 import { TopNav } from "@/components/TopNav";
+import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -39,7 +40,7 @@ const tabs = [
   { id: "reptes", label: "Reptes", icon: Gamepad2 },
   { id: "clases", label: "Grups", icon: GraduationCap },
   { id: "alumnos", label: "Alumnes", icon: Users },
-  { id: "crear", label: "Crear joc", icon: Gamepad2 },
+  { id: "crear", label: "Crear Jic", icon: Gamepad2 },
   { id: "importar", label: "Importar IA", icon: FileJson },
   { id: "publicados", label: "Publicats", icon: Library }
 ];
@@ -107,6 +108,11 @@ export default async function TeacherPage() {
           subtitle={`Hola, ${session.name}. Cada secció té la seva pròpia finestra.`}
         />
 
+        <JicGuide
+          tone="purple"
+          message={`Hola, ${session.name}! Soc en Jic. Et guiaré per crear Jics, assignar reptes i revisar com avança cada alumne.`}
+        />
+
         <div className="teacher-tabs">
           {tabs.map((tab, index) => (
             <input
@@ -134,7 +140,7 @@ export default async function TeacherPage() {
             <div className="grid grid-3">
               <article className="card stat">
                 <h2>1</h2>
-                <p className="muted">Crea o importa un joc</p>
+                <p className="muted">Crea o importa un Jic</p>
               </article>
               <article className="card stat cyan">
                 <h2>2</h2>
@@ -152,7 +158,7 @@ export default async function TeacherPage() {
               <article className="card stat cyan">
                 <BookOpen color="#18a0e8" />
                 <h2>{data.games.length}</h2>
-                <p className="muted">Jocs</p>
+                <p className="muted">Jics</p>
               </article>
               <article className="card stat orange">
                 <Play color="#f05800" />
@@ -164,7 +170,7 @@ export default async function TeacherPage() {
 
           <section className="tab-panel tab-content tab-quadern panel">
             <h2>Quadern del professor</h2>
-            <p className="muted">Vista ràpida d'alumnes, punts, jocs fets i deures assignats.</p>
+            <p className="muted">Vista ràpida d'alumnes, punts, Jics fets i deures assignats.</p>
             <div className="list" style={{ marginTop: 18 }}>
               {data.students.map((student: { _id: string; name: string; email: string; gradeLevel: number }) => {
                 const stats = statsByStudent.get(student._id) as any;
@@ -178,7 +184,7 @@ export default async function TeacherPage() {
                       <strong>{student.name}</strong>
                       <div className="muted">{student.email} · {student.gradeLevel}º</div>
                       <div className="muted">
-                        {stats?.totalScore || 0} punts · {stats?.attempts || 0} partides · {doneGames} jocs fets
+                        {stats?.totalScore || 0} punts · {stats?.attempts || 0} partides · {doneGames} Jics fets
                       </div>
                     </div>
                     <div className="toolbar">
@@ -194,7 +200,7 @@ export default async function TeacherPage() {
           <section className="tab-panel tab-content tab-reptes grid grid-2">
             <div className="panel">
               <h2>Crear repte / deures</h2>
-              <p className="muted">Tria jocs, tria alumnes i publica-ho a “Els meus deures”.</p>
+              <p className="muted">Tria Jics, tria alumnes i publica-ho a “Els meus deures”.</p>
               <form className="form" action={createChallengeAction}>
                 <div className="field">
                   <label>Títol del repte</label>
@@ -202,14 +208,14 @@ export default async function TeacherPage() {
                 </div>
                 <div className="field">
                   <label>Descripció</label>
-                  <textarea name="description" placeholder="Fes aquests jocs abans de divendres." />
+                  <textarea name="description" placeholder="Fes aquests Jics abans de divendres." />
                 </div>
                 <div className="field">
                   <label>Data límit</label>
                   <input name="dueDate" type="date" />
                 </div>
                 <div className="field">
-                  <label>Jocs del repte</label>
+                  <label>Jics del repte</label>
                   <div className="choice-grid">
                     {data.games.map((game: { _id: string; title: string }) => (
                       <label className="choice" key={game._id}>
@@ -243,7 +249,7 @@ export default async function TeacherPage() {
                       <strong>{challenge.title}</strong>
                       <p className="muted">{challenge.description || "Sense descripció"}</p>
                       <div className="muted">
-                        {challenge.gameIds?.length || 0} jocs · {challenge.studentIds?.length || 0} alumnes
+                        {challenge.gameIds?.length || 0} Jics · {challenge.studentIds?.length || 0} alumnes
                       </div>
                     </div>
                     <form action={closeChallengeAction}>
@@ -402,7 +408,7 @@ export default async function TeacherPage() {
           </section>
 
           <section className="tab-panel tab-content tab-crear panel">
-            <h2>Crear joc demo</h2>
+            <h2>Crear Jic demo</h2>
             <p className="muted">Crea una activitat base i després la podràs jugar des de la biblioteca.</p>
             <form className="form form-wide" action={createGameAction}>
               <div className="field">
@@ -452,7 +458,7 @@ export default async function TeacherPage() {
                 </select>
               </div>
               <button className="button secondary" type="submit">
-                <Plus size={18} /> Crear joc
+                <Plus size={18} /> Crear Jic
               </button>
             </form>
           </section>
@@ -465,12 +471,12 @@ export default async function TeacherPage() {
             <div className="panel">
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <FileJson color="#c000d8" />
-                <h2>Importar joc amb IA</h2>
+                <h2>Importar Jic amb IA</h2>
               </div>
               <p className="muted">Enganxa el JSON generat per la IA o un text estructurat.</p>
               <form className="form" action={importGameAction}>
                 <div className="field">
-                  <label>JSON o text del joc</label>
+                  <label>JSON o text del Jic</label>
                   <textarea
                     name="gameImport"
                     required
@@ -488,7 +494,7 @@ PE_X=PEIX`}
                   />
                 </div>
                 <button className="button secondary" type="submit">
-                  <Upload size={18} /> Importar y publicar
+                  <Upload size={18} /> Importar i publicar
                 </button>
               </form>
             </div>
@@ -497,8 +503,8 @@ PE_X=PEIX`}
           <section className="tab-panel tab-content tab-publicados panel">
             <div className="row" style={{ border: 0, padding: 0 }}>
               <div>
-                <h2>Jocs publicats</h2>
-                <p className="muted">Aquí veus els teus jocs. La biblioteca mostra tots els publicats.</p>
+                <h2>Jics publicats</h2>
+                <p className="muted">Aquí veus els teus Jics. La biblioteca mostra tots els publicats.</p>
               </div>
               <Link className="button black" href="/games">
                 <Library size={18} /> Veure biblioteca
@@ -523,7 +529,7 @@ PE_X=PEIX`}
                   </form>
                 </article>
               ))}
-              {data.games.length === 0 && <p className="muted">Crea o importa un joc per començar.</p>}
+              {data.games.length === 0 && <p className="muted">Crea o importa un Jic per començar.</p>}
             </div>
           </section>
           </div>

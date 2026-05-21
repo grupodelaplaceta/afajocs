@@ -4,6 +4,7 @@ import { getSession, getStudentByUserIdOrEmail } from "@/lib/auth";
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { TopNav } from "@/components/TopNav";
+import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -43,17 +44,22 @@ export default async function GamesPage() {
       <div className="shell">
         <TopNav
           session={session}
-          title="Biblioteca de jocs"
-          subtitle="Tots els jocs publicats, preparats per a l'aula, la tauleta o casa."
+          title="Biblioteca de Jics"
+          subtitle="Tots els Jics publicats, preparats per a l'aula, la tauleta o casa."
         />
 
         <section className="hero library-hero">
-          <p className="eyebrow">Jocs publicats</p>
+          <p className="eyebrow">Jics publicats</p>
           <h1>Tria una activitat i comença a jugar.</h1>
           <p className="muted">
-            Targetes grans, filtres visuals per curs i accés directe a cada joc.
+            Targetes grans, filtres visuals per curs i accés directe a cada Jic.
           </p>
         </section>
+
+        <JicGuide
+          tone="orange"
+          message="Busca un Jic pel teu curs, mira el detall si vols veure els rècords i prem jugar quan estiguis a punt."
+        />
 
         <section className="game-card-grid" style={{ marginTop: 18 }}>
           {games.map((game: any) => (
@@ -78,8 +84,8 @@ export default async function GamesPage() {
           ))}
           {games.length === 0 && (
             <div className="panel">
-              <h2>Encara no hi ha jocs publicats</h2>
-              <p className="muted">Quan un professor publiqui jocs, apareixeran aquí.</p>
+              <h2>Encara no hi ha Jics publicats</h2>
+              <p className="muted">Quan un professor publiqui Jics, apareixeran aquí.</p>
             </div>
           )}
         </section>

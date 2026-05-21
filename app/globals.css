@@ -148,6 +148,84 @@ select {
   color: var(--brand-orange);
 }
 
+.jic-guide {
+  align-items: center;
+  background: var(--brand-white);
+  border: 3px solid var(--brand-purple);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--brand-black);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  margin: 18px 0;
+  padding: clamp(14px, 2vw, 20px);
+}
+
+.jic-guide.cyan {
+  border-color: var(--brand-cyan);
+}
+
+.jic-guide.orange {
+  border-color: var(--brand-orange);
+}
+
+.jic-guide.compact {
+  box-shadow: none;
+  margin: 12px 0;
+}
+
+.jic-avatar {
+  background: var(--brand-purple);
+  border: 5px solid var(--brand-black);
+  border-radius: 42% 58% 48% 52%;
+  height: 74px;
+  position: relative;
+  width: 74px;
+}
+
+.jic-guide.cyan .jic-avatar {
+  background: var(--brand-cyan);
+}
+
+.jic-guide.orange .jic-avatar {
+  background: var(--brand-orange);
+}
+
+.jic-eye {
+  background: var(--brand-white);
+  border: 3px solid var(--brand-black);
+  border-radius: 999px;
+  height: 15px;
+  position: absolute;
+  top: 24px;
+  width: 15px;
+}
+
+.jic-eye.left {
+  left: 18px;
+}
+
+.jic-eye.right {
+  right: 18px;
+}
+
+.jic-smile {
+  border-bottom: 4px solid var(--brand-black);
+  border-radius: 999px;
+  bottom: 18px;
+  height: 16px;
+  left: 22px;
+  position: absolute;
+  width: 30px;
+}
+
+.jic-bubble p {
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
 .grid {
   display: grid;
   gap: 18px;
@@ -902,6 +980,7 @@ p {
 .panel,
 .card,
 .hero,
+.jic-guide,
 .button,
 .field input,
 .field select,
@@ -1026,9 +1105,14 @@ p {
   }
 
   .topbar,
-  .game-header {
+  .game-header,
+  .jic-guide {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .jic-guide {
+    display: flex;
   }
 
   .topbar nav,

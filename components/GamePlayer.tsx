@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy, Volume2 } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
+import { JicGuide } from "@/components/JicGuide";
 
 type StudentOption = {
   _id: string;
@@ -172,6 +173,12 @@ export function GamePlayer({
           </button>
         </div>
 
+        <JicGuide
+          compact
+          tone="orange"
+          message="Quan premis començar faré el compte enrere. Llegeix o escolta les instruccions i intenta superar el teu rècord."
+        />
+
         {mode === "classroom" && (
           <div className="field" style={{ margin: "18px 0" }}>
             <label>Qui juga ara?</label>
@@ -266,6 +273,7 @@ export function GamePlayer({
             <Volume2 size={18} /> Escoltar
           </button>
         </div>
+        <JicGuide compact tone="cyan" message="Jo et marco la missió. Si veus un botó d'escoltar, el pots prémer per sentir paraules i enunciats." />
 
         {!finished && game.type === "matching" && <MatchingActivity game={game} onFinish={finish} />}
         {!finished && game.type === "fill_blanks" && (

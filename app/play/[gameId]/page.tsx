@@ -18,7 +18,7 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
 
   const game = await Game.findById(gameId).lean();
   if (!game || game.isDeleted) {
-    return <main className="page">Joc no trobat.</main>;
+    return <main className="page">Jic no trobat.</main>;
   }
 
   let students: any[] = [];

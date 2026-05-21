@@ -280,7 +280,7 @@ export async function deleteGameAction(formData: FormData) {
       isPublished: false,
       isDeleted: true,
       deletedAt: new Date(),
-      title: "joc eliminat"
+      title: "Jic eliminat"
     }
   );
 
@@ -375,13 +375,13 @@ export async function saveAttemptAction(formData: FormData) {
   await connectDb();
   const game = await Game.findById(parsed.gameId);
   if (!game) {
-    throw new Error("Juego no encontrado.");
+    throw new Error("Jic no encontrado.");
   }
 
   const scoreData = calculateScore(parsed);
   const attempt = await GameAttempt.create({
     gameId: parsed.gameId,
-    gameTitleSnapshot: game.isDeleted ? "joc eliminat" : game.title,
+    gameTitleSnapshot: game.isDeleted ? "Jic eliminat" : game.title,
     studentId: parsed.studentId,
     teacherId: game.teacherId,
     mode: parsed.mode,

@@ -9,7 +9,7 @@ const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search", "le
 const difficulties = ["easy", "medium", "hard"] as const;
 
 export const aiGamePrompt = `Actua como diseñador de actividades educativas para primaria.
-Crea UNA actividad para AFAJICS en JSON valido, sin markdown, sin comentarios y sin texto adicional.
+Crea UNA actividad para AFAJICS en JSON valido, sin markdown, sin comentarios y sin texto adicional. En la plataforma cada actividad se llama "Jic".
 
 Reglas:
 - Publico: alumnos de primaria.
@@ -19,7 +19,7 @@ Reglas:
 
 Formato obligatorio:
 {
-  "title": "Titulo del juego",
+  "title": "Titulo del Jic",
   "subject": "Asignatura",
   "type": "matching | fill_blanks | basic_typing | word_search | letter_fill",
   "gradeMin": 1,
@@ -100,7 +100,7 @@ export type ImportedGame = z.infer<typeof baseImportSchema>;
 export function parseImportedGame(raw: string): ImportedGame {
   const trimmed = raw.trim();
   if (!trimmed) {
-    throw new Error("Pega un JSON o texto estructurado para importar el juego.");
+    throw new Error("Pega un JSON o texto estructurado para importar el Jic.");
   }
 
   const parsed = normalizeImportedShape(trimmed.startsWith("{") ? JSON.parse(trimmed) : parseStructuredText(trimmed));
@@ -180,7 +180,7 @@ function parseStructuredText(raw: string) {
   const type = inferStructuredType(fields, sections);
   const gradeRange = parseGradeRange(fields.get("cursos") || "1-6");
   const base = {
-    title: fields.get("titulo") || fields.get("titol") || "Joc importat",
+    title: fields.get("titulo") || fields.get("titol") || "Jic importat",
     subject: fields.get("asignatura") || fields.get("assignatura") || "General",
     type,
     gradeMin: gradeRange.gradeMin,
@@ -319,7 +319,7 @@ function validateContent(game: ImportedGame) {
   if (game.type === "matching") {
     const pairs = game.content.pairs;
     if (!Array.isArray(pairs) || pairs.length < 2) {
-      throw new Error("Un juego de relacionar necesita al menos 2 pares.");
+      throw new Error("Un Jic de relacionar necesita al menos 2 pares.");
     }
   }
 
@@ -327,14 +327,14 @@ function validateContent(game: ImportedGame) {
     const blanks = game.content.blanks;
     const wordBank = game.content.wordBank;
     if (!Array.isArray(blanks) || blanks.length < 1 || !Array.isArray(wordBank) || wordBank.length < 2) {
-      throw new Error("Un juego de huecos necesita huecos y un banco de palabras.");
+      throw new Error("Un Jic de huecos necesita huecos y un banco de palabras.");
     }
   }
 
   if (game.type === "basic_typing") {
     const prompts = game.content.prompts;
     if (!Array.isArray(prompts) || prompts.length < 1) {
-      throw new Error("Un juego de escritura necesita al menos una pregunta.");
+      throw new Error("Un Jic de escritura necesita al menos una pregunta.");
     }
   }
 
