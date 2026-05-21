@@ -585,15 +585,17 @@ function WordSearchActivity({
 
   function toggleCell(row: number, col: number) {
     const key = `${row}-${col}`;
-    if (foundCells.includes(key)) {
-      return;
-    }
 
     setSelected((current) => {
-      if (current.includes(key)) {
-        return current.filter((item) => item !== key);
+      if (!current.length || current.length > 1) {
+        return [key];
       }
-      return [...current, key];
+
+      if (current[0] === key) {
+        return [];
+      }
+
+      return buildLineSelection(current[0], key, grid) || [key];
     });
   }
 
@@ -634,7 +636,7 @@ function WordSearchActivity({
       </aside>
 
       <div className="toolbar" style={{ justifyContent: "flex-start" }}>
-        <span className="badge cyan">Detecta automàticament: {selectedWord || "tria lletres"}</span>
+        <span className="badge cyan">Toca inici i final: {selectedWord || "tria una paraula"}</span>
         <button
           className="button"
           type="button"
@@ -656,6 +658,49 @@ function readSelectedWord(selected: string[], grid: string[]) {
     .join("");
 }
 
+function buildLineSelection(startKey: string, endKey: string, grid: string[]) {
+  const start = parseCellKey(startKey);
+  const end = parseCellKey(endKey);
+  if (!start || !end) {
+    return null;
+  }
+
+  const rowDiff = end.row - start.row;
+  const colDiff = end.col - start.col;
+  const rowStep = Math.sign(rowDiff);
+  const colStep = Math.sign(colDiff);
+  const isStraight =
+    rowDiff === 0 ||
+    colDiff === 0 ||
+    Math.abs(rowDiff) === Math.abs(colDiff);
+
+  if (!isStraight) {
+    return null;
+  }
+
+  const steps = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+  const keys: string[] = [];
+
+  for (let index = 0; index <= steps; index++) {
+    const row = start.row + rowStep * index;
+    const col = start.col + colStep * index;
+    if (!grid[row]?.[col]) {
+      return null;
+    }
+    keys.push(`${row}-${col}`);
+  }
+
+  return keys;
+}
+
+function parseCellKey(key: string) {
+  const [row, col] = key.split("-").map(Number);
+  if (!Number.isFinite(row) || !Number.isFinite(col)) {
+    return null;
+  }
+  return { row, col };
+}
+
 function findSelectedWordMatch(
   selectedWord: string,
   words: Array<{ id: string; word: string }>,
@@ -663,7 +708,6 @@ function findSelectedWordMatch(
 ) {
   const normalized = normalizeAnswer(selectedWord);
   const reversed = normalizeAnswer(selectedWord.split("").reverse().join(""));
-  const unordered = sortLetters(normalized);
 
   return words.find((item) => {
     if (found.includes(item.id)) {
@@ -671,10 +715,6 @@ function findSelectedWordMatch(
     }
 
     const word = normalizeAnswer(item.word);
-    return normalized === word || reversed === word || unordered === sortLetters(word);
+    return normalized === word || reversed === word;
   });
-}
-
-function sortLetters(value: string) {
-  return value.split("").sort().join("");
 }
