@@ -266,6 +266,29 @@ export async function importGameAction(formData: FormData) {
   revalidatePath("/games");
 }
 
+export async function deleteGameAction(formData: FormData) {
+  const session = await requireUser("teacher");
+  const gameId = z.string().min(1).parse(formData.get("gameId"));
+  const teacher = await getTeacherByUserId(session.id);
+  if (!teacher) {
+    throw new Error("Perfil de professor no trobat.");
+  }
+
+  await Game.findOneAndUpdate(
+    { _id: gameId, teacherId: teacher._id },
+    {
+      isPublished: false,
+      isDeleted: true,
+      deletedAt: new Date(),
+      title: "joc eliminat"
+    }
+  );
+
+  revalidatePath("/teacher");
+  revalidatePath("/games");
+  revalidatePath(`/games/${gameId}`);
+}
+
 const attemptSchema = z.object({
   gameId: z.string(),
   studentId: z.string(),
@@ -298,6 +321,7 @@ export async function saveAttemptAction(formData: FormData) {
   const scoreData = calculateScore(parsed);
   const attempt = await GameAttempt.create({
     gameId: parsed.gameId,
+    gameTitleSnapshot: game.isDeleted ? "joc eliminat" : game.title,
     studentId: parsed.studentId,
     teacherId: game.teacherId,
     mode: parsed.mode,

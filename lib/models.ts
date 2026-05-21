@@ -54,6 +54,8 @@ const gameSchema = new Schema(
     difficulty: { type: String, required: true, enum: ["easy", "medium", "hard"] },
     estimatedTimeSeconds: { type: Number, default: 90 },
     isPublished: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date },
     content: { type: Schema.Types.Mixed, required: true },
     version: { type: Number, default: 1 }
   },
@@ -63,6 +65,7 @@ const gameSchema = new Schema(
 const attemptSchema = new Schema(
   {
     gameId: { type: Schema.Types.ObjectId, ref: "Game", required: true },
+    gameTitleSnapshot: { type: String, default: "joc eliminat" },
     studentId: { type: Schema.Types.ObjectId, ref: "Student", required: true },
     teacherId: { type: Schema.Types.ObjectId, ref: "Teacher" },
     mode: { type: String, required: true, enum: ["classroom", "remote"] },

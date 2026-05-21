@@ -30,7 +30,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
   await connectDb();
 
   const game = await Game.findById(gameId).lean();
-  if (!game) {
+  if (!game || game.isDeleted) {
     return <main className="page">Joc no trobat.</main>;
   }
 

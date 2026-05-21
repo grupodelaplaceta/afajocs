@@ -17,6 +17,7 @@ import {
   deleteClassAction,
   createGameAction,
   createStudentAction,
+  deleteGameAction,
   importGameAction,
   logoutAction,
   updateClassAction
@@ -57,7 +58,7 @@ export default async function TeacherPage() {
   const [classes, students, games, attempts, records, studentStats] = await Promise.all([
     ClassGroup.find({ teacherId: teacher._id }).sort({ createdAt: -1 }).lean(),
     Student.find({ teacherOwnerId: teacher._id }).sort({ createdAt: -1 }).lean(),
-    Game.find({ teacherId: teacher._id }).sort({ createdAt: -1 }).lean(),
+    Game.find({ teacherId: teacher._id, isDeleted: { $ne: true } }).sort({ createdAt: -1 }).lean(),
     GameAttempt.find({ teacherId: teacher._id }).sort({ createdAt: -1 }).limit(8).lean(),
     StudentGameRecord.find({})
       .populate("studentId", "name email")
@@ -400,6 +401,12 @@ GAT, PEIX, DOFI, OS, CASA`}
                   <Link className="button" href={`/play/${game._id}`}>
                     Jugar
                   </Link>
+                  <form action={deleteGameAction}>
+                    <input type="hidden" name="gameId" value={game._id} />
+                    <button className="button secondary" type="submit">
+                      Eliminar
+                    </button>
+                  </form>
                 </article>
               ))}
               {data.games.length === 0 && <p className="muted">Crea o importa un joc per començar.</p>}

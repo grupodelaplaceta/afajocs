@@ -16,7 +16,7 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
   await connectDb();
 
   const game = await Game.findById(gameId).lean();
-  if (!game) {
+  if (!game || game.isDeleted) {
     return <main className="page">Joc no trobat.</main>;
   }
 

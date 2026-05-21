@@ -30,10 +30,11 @@ export default async function GamesPage() {
     student
       ? {
           isPublished: true,
+          isDeleted: { $ne: true },
           gradeMin: { $lte: student.gradeLevel },
           gradeMax: { $gte: student.gradeLevel }
         }
-      : { isPublished: true };
+      : { isPublished: true, isDeleted: { $ne: true } };
 
   const games = asPlain(await Game.find(query).sort({ createdAt: -1 }).lean());
 

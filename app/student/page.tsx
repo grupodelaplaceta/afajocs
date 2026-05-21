@@ -37,7 +37,8 @@ export default async function StudentPage() {
     Game.find({
       gradeMin: { $lte: student.gradeLevel },
       gradeMax: { $gte: student.gradeLevel },
-      isPublished: true
+      isPublished: true,
+      isDeleted: { $ne: true }
     })
       .sort({ createdAt: -1 })
       .lean(),
@@ -112,7 +113,7 @@ export default async function StudentPage() {
               {data.records.map((record: { _id: string; bestScore: number; bestTimeSeconds: number; gameId?: { title?: string } }) => (
                 <div className="row" key={record._id}>
                   <div>
-                    <strong>{record.gameId?.title || "Joc"}</strong>
+                    <strong>{record.gameId?.title || "joc eliminat"}</strong>
                     <div className="muted">{record.bestTimeSeconds}s</div>
                   </div>
                   <span className="badge cyan">
@@ -121,6 +122,22 @@ export default async function StudentPage() {
                 </div>
               ))}
               {data.records.length === 0 && <p className="muted">Juga una partida per estrenar rècords.</p>}
+            </div>
+          </div>
+
+          <div className="panel">
+            <h2>Últimes puntuacions</h2>
+            <div className="list" style={{ marginTop: 14 }}>
+              {data.attempts.map((attempt: { _id: string; score: number; timeSpentSeconds: number; gameTitleSnapshot?: string }) => (
+                <div className="row" key={attempt._id}>
+                  <div>
+                    <strong>{attempt.gameTitleSnapshot || "joc eliminat"}</strong>
+                    <div className="muted">{attempt.timeSpentSeconds}s</div>
+                  </div>
+                  <span className="badge orange">{attempt.score} punts</span>
+                </div>
+              ))}
+              {data.attempts.length === 0 && <p className="muted">Encara no hi ha puntuacions.</p>}
             </div>
           </div>
         </section>
