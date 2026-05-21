@@ -4,6 +4,7 @@ import { getSession, getStudentByUserIdOrEmail, getTeacherByUserId } from "@/lib
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { getGameRecordViews } from "@/lib/record-views";
+import { BrandLogo } from "@/components/BrandLogo";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -54,14 +55,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
       <div className="shell">
         <header className="topbar">
           <div>
-            <div className="brand">
-              <span className="brand-mark">
-                <span>a</span>
-                <span>F</span>
-                <span>A</span>
-              </span>
-              Detalle de actividad
-            </div>
+            <BrandLogo label="Detalle de actividad" />
             <p className="muted">Consulta records antes de jugar.</p>
           </div>
           <div className="toolbar">
@@ -153,4 +147,3 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
     </main>
   );
 }
-

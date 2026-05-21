@@ -14,15 +14,18 @@ import {
 import { requireUser, getTeacherByUserId } from "@/lib/auth";
 import {
   createClassAction,
+  deleteClassAction,
   createGameAction,
   createStudentAction,
   importGameAction,
-  logoutAction
+  logoutAction,
+  updateClassAction
 } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { aiGamePrompt } from "@/lib/game-import";
 import { ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
 import { AiPromptBox } from "@/components/AiPromptBox";
+import { BrandLogo } from "@/components/BrandLogo";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -77,14 +80,7 @@ export default async function TeacherPage({
       <div className="shell">
         <header className="topbar">
           <div>
-            <div className="brand">
-              <span className="brand-mark">
-                <span>a</span>
-                <span>F</span>
-                <span>A</span>
-              </span>
-              Panel profesor
-            </div>
+            <BrandLogo label="Panel profesor" />
             <p className="muted">Hola, {session.name}. Cada seccion tiene su propia ventana.</p>
           </div>
           <div className="toolbar">
@@ -167,12 +163,50 @@ export default async function TeacherPage({
               <h2>Grupos</h2>
               <div className="list" style={{ marginTop: 14 }}>
                 {data.classes.map((group: { _id: string; name: string; gradeLevel?: number; gradeLevels?: number[] }) => (
-                  <div className="row" key={group._id}>
-                    <div>
-                      <strong>{group.name}</strong>
-                      <div className="muted">Cursos: {gradeLabel(group)}</div>
-                    </div>
-                    <span className="badge cyan">Grupo</span>
+                  <div className="inline-edit-form" key={group._id}>
+                    <form className="form" action={updateClassAction}>
+                      <input type="hidden" name="classId" value={group._id} />
+                      <div className="field">
+                        <label>Nombre del grupo</label>
+                        <input name="name" defaultValue={group.name} required />
+                      </div>
+                      <div className="field">
+                        <label>Cursos</label>
+                        <div className="choice-grid">
+                          {[1, 2, 3, 4, 5, 6].map((grade) => {
+                            const selectedGrades = group.gradeLevels?.length
+                              ? group.gradeLevels
+                              : group.gradeLevel
+                                ? [group.gradeLevel]
+                                : [];
+                            return (
+                              <label className="choice" key={grade}>
+                                <input
+                                  name="gradeLevels"
+                                  type="checkbox"
+                                  value={grade}
+                                  defaultChecked={selectedGrades.includes(grade)}
+                                />
+                                <span>{grade}º</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <button className="button cyan" type="submit">
+                        Guardar cambios
+                      </button>
+                    </form>
+                    <form action={deleteClassAction} className="danger-zone inline-edit-form">
+                      <input type="hidden" name="classId" value={group._id} />
+                      <div>
+                        <strong>{group.name}</strong>
+                        <div className="muted">Cursos actuales: {gradeLabel(group)}</div>
+                      </div>
+                      <button className="button secondary" type="submit">
+                        Eliminar grupo
+                      </button>
+                    </form>
                   </div>
                 ))}
                 {data.classes.length === 0 && <p className="muted">Crea tu primer grupo.</p>}
@@ -366,4 +400,3 @@ Aguila = Cielo`}
     </main>
   );
 }
-

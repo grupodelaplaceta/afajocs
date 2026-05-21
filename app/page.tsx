@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Gamepad2, GraduationCap, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default async function HomePage() {
   const session = await getSession();
@@ -9,14 +10,7 @@ export default async function HomePage() {
     <main className="page">
       <div className="shell">
         <header className="topbar">
-          <div className="brand">
-            <span className="brand-mark">
-              <span>a</span>
-              <span>F</span>
-              <span>A</span>
-            </span>
-            AFAJICS
-          </div>
+          <BrandLogo />
           <nav style={{ display: "flex", gap: 10 }}>
             {session ? (
               <Link className="button" href={session.role === "teacher" ? "/teacher" : "/student"}>

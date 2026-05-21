@@ -116,6 +116,45 @@ export async function createClassAction(formData: FormData) {
   revalidatePath("/teacher");
 }
 
+export async function updateClassAction(formData: FormData) {
+  const session = await requireUser("teacher");
+  const parsed = classSchema.extend({ classId: z.string().min(1) }).parse({
+    classId: formData.get("classId"),
+    name: formData.get("name"),
+    gradeLevels: formData.getAll("gradeLevels")
+  });
+  const teacher = await getTeacherByUserId(session.id);
+  if (!teacher) {
+    throw new Error("Perfil de profesor no encontrado.");
+  }
+
+  await ClassGroup.findOneAndUpdate(
+    { _id: parsed.classId, teacherId: teacher._id },
+    {
+      name: parsed.name,
+      gradeLevel: parsed.gradeLevels[0],
+      gradeLevels: parsed.gradeLevels
+    }
+  );
+
+  revalidatePath("/teacher");
+  revalidatePath("/games");
+}
+
+export async function deleteClassAction(formData: FormData) {
+  const session = await requireUser("teacher");
+  const classId = z.string().min(1).parse(formData.get("classId"));
+  const teacher = await getTeacherByUserId(session.id);
+  if (!teacher) {
+    throw new Error("Perfil de profesor no encontrado.");
+  }
+
+  await ClassGroup.findOneAndDelete({ _id: classId, teacherId: teacher._id });
+
+  revalidatePath("/teacher");
+  revalidatePath("/games");
+}
+
 const studentSchema = z.object({
   name: z.string().min(2).max(160),
   email: z.string().email(),

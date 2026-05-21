@@ -4,6 +4,7 @@ import { getSession, getStudentByUserIdOrEmail } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
+import { BrandLogo } from "@/components/BrandLogo";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -40,14 +41,7 @@ export default async function GamesPage() {
       <div className="shell">
         <header className="topbar">
           <div>
-            <div className="brand">
-              <span className="brand-mark">
-                <span>a</span>
-                <span>F</span>
-                <span>A</span>
-              </span>
-              Biblioteca de juegos
-            </div>
+            <BrandLogo label="Biblioteca de juegos" />
             <p className="muted">
               Todos los juegos publicados, listos para aula, tablet o casa.
             </p>

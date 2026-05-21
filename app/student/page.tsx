@@ -4,6 +4,7 @@ import { getStudentByUserIdOrEmail, requireUser } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Game, GameAttempt, StudentGameRecord } from "@/lib/models";
+import { BrandLogo } from "@/components/BrandLogo";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -51,14 +52,7 @@ export default async function StudentPage() {
       <div className="shell">
         <header className="topbar">
           <div>
-            <div className="brand">
-              <span className="brand-mark">
-                <span>a</span>
-                <span>F</span>
-                <span>A</span>
-              </span>
-              Panel alumno
-            </div>
+            <BrandLogo label="Panel alumno" />
             <p className="muted">Hola, {student.name}. Tus juegos y records viven aqui.</p>
           </div>
           <form action={logoutAction}>

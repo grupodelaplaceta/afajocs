@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { registerAction } from "@/lib/actions";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function RegisterPage() {
   return (
     <main className="page">
       <div className="shell" style={{ maxWidth: 560 }}>
         <div className="panel">
-          <div className="brand" style={{ marginBottom: 20 }}>
-            <span className="brand-mark">
-              <span>a</span>
-              <span>F</span>
-              <span>A</span>
-            </span>
-            Crear cuenta
+          <div style={{ marginBottom: 20 }}>
+            <BrandLogo label="Crear cuenta" />
           </div>
           <form className="form" action={registerAction}>
             <div className="field">
@@ -46,4 +42,3 @@ export default function RegisterPage() {
     </main>
   );
 }
-

@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { loginAction } from "@/lib/actions";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function LoginPage() {
   return (
     <main className="page">
       <div className="shell" style={{ maxWidth: 520 }}>
         <div className="panel">
-          <div className="brand" style={{ marginBottom: 20 }}>
-            <span className="brand-mark">
-              <span>a</span>
-              <span>F</span>
-              <span>A</span>
-            </span>
-            Entrar
+          <div style={{ marginBottom: 20 }}>
+            <BrandLogo label="Entrar" />
           </div>
           <form className="form" action={loginAction}>
             <div className="field">
@@ -35,4 +31,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

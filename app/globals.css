@@ -115,6 +115,13 @@ select {
   font-weight: 900;
 }
 
+.brand-logo {
+  display: block;
+  height: clamp(42px, 6vw, 64px);
+  object-fit: contain;
+  width: clamp(84px, 11vw, 128px);
+}
+
 .brand-mark {
   align-items: center;
   background: var(--brand-black);
@@ -429,6 +436,18 @@ p {
   accent-color: var(--brand-cyan);
   height: 22px;
   width: 22px;
+}
+
+.inline-edit-form {
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.danger-zone {
+  border-color: var(--brand-orange);
 }
 
 .row {
