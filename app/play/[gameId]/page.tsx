@@ -4,6 +4,7 @@ import { getSession, getStudentByUserIdOrEmail, getTeacherByUserId } from "@/lib
 import { connectDb } from "@/lib/db";
 import { Game, Student } from "@/lib/models";
 import { GamePlayer } from "@/components/GamePlayer";
+import { getGameRecordViews } from "@/lib/record-views";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -22,9 +23,11 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
   let students: any[] = [];
   let defaultStudentId = "";
   let mode: "classroom" | "remote" = "classroom";
+  let teacherId: unknown = undefined;
 
   if (session?.role === "teacher") {
     const teacher = await getTeacherByUserId(session.id);
+    teacherId = teacher?._id;
     students = teacher ? await Student.find({ teacherOwnerId: teacher._id }).sort({ name: 1 }).lean() : [];
   }
 
@@ -37,7 +40,8 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
     }
   }
 
-  const data = asPlain({ game, students });
+  const recordViews = await getGameRecordViews(gameId, teacherId, defaultStudentId || undefined);
+  const data = asPlain({ game, students, recordViews });
 
   return (
     <main className="page game-page">
@@ -51,6 +55,8 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
             students={data.students as any}
             defaultStudentId={defaultStudentId}
             mode={mode}
+            records={data.recordViews.records}
+            classRecords={data.recordViews.classRecords}
           />
         </div>
       </div>

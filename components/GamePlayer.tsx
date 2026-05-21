@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Clock, Trophy } from "lucide-react";
+import { Check, Clock, Medal, Sparkles, Trophy } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
 
@@ -25,9 +25,27 @@ type Props = {
   students: StudentOption[];
   defaultStudentId?: string;
   mode: "classroom" | "remote";
+  records?: GameRecord[];
+  classRecords?: ClassRecord[];
 };
 
-export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
+type GameRecord = {
+  studentId: string;
+  studentName: string;
+  bestScore: number;
+  bestTimeSeconds: number;
+};
+
+type ClassRecord = {
+  classId: string;
+  className: string;
+  gradeLevels: number[];
+  bestScore: number;
+  bestTimeSeconds: number | null;
+  studentName: string | null;
+};
+
+export function GamePlayer({ game, students, defaultStudentId, mode, records = [], classRecords = [] }: Props) {
   const [selectedStudentId, setSelectedStudentId] = useState(defaultStudentId || "");
   const [started, setStarted] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -37,6 +55,8 @@ export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
 
   const totalItems = useMemo(() => getTotalItems(game), [game]);
   const timeSpentSeconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
+  const personalRecord = records.find((record) => record.studentId === selectedStudentId);
+  const activeStudent = students.find((student) => student._id === selectedStudentId);
 
   function start() {
     setStarted(true);
@@ -51,7 +71,7 @@ export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
 
   if (!started) {
     return (
-      <div className="game-board">
+      <div className="game-board animate-in">
         <p className="eyebrow">Preparacion</p>
         <h1 style={{ color: "#101014", fontSize: "clamp(2rem, 5vw, 4rem)" }}>{game.title}</h1>
         <p className="muted">{String(game.content.instructions || "Completa la actividad.")}</p>
@@ -70,8 +90,40 @@ export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
           </div>
         )}
 
+        <div className="record-grid" style={{ marginTop: 18 }}>
+          <article className="record-card featured">
+            <Medal size={30} />
+            <div>
+              <span className="eyebrow">Record personal</span>
+              <h2>{personalRecord ? `${personalRecord.bestScore} pts` : "Sin record"}</h2>
+              <p className="muted">
+                {personalRecord
+                  ? `${activeStudent?.name || personalRecord.studentName} · ${personalRecord.bestTimeSeconds}s`
+                  : selectedStudentId
+                    ? "Primera oportunidad para marcar record."
+                    : "Selecciona alumno para verlo."}
+              </p>
+            </div>
+          </article>
+
+          {classRecords.slice(0, 3).map((record) => (
+            <article className="record-card" key={record.classId}>
+              <Trophy size={28} />
+              <div>
+                <span className="eyebrow">{record.className}</span>
+                <h2>{record.bestScore ? `${record.bestScore} pts` : "Sin record"}</h2>
+                <p className="muted">
+                  {record.studentName
+                    ? `${record.studentName} · ${record.bestTimeSeconds}s`
+                    : `Cursos ${record.gradeLevels.map((grade) => `${grade}º`).join(" + ") || "mixtos"}`}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+
         <button className="button secondary" disabled={!selectedStudentId} onClick={start}>
-          Empezar
+          <Sparkles size={18} /> Empezar
         </button>
       </div>
     );
@@ -94,7 +146,7 @@ export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
         </div>
       </header>
 
-      <div className="game-board">
+      <div className="game-board animate-in">
         <p className="eyebrow">Mision</p>
         <h2>{String(game.content.instructions || "Completa la actividad.")}</h2>
 
@@ -103,7 +155,7 @@ export function GamePlayer({ game, students, defaultStudentId, mode }: Props) {
         {!finished && game.type === "basic_typing" && <TypingActivity game={game} onFinish={finish} />}
 
         {finished && (
-          <form action={saveAttemptAction} className="panel" style={{ marginTop: 18 }}>
+          <form action={saveAttemptAction} className="panel result-panel" style={{ marginTop: 18 }}>
             <Trophy color="#f05800" size={42} />
             <h2>Resultado listo</h2>
             <p className="muted">
@@ -156,7 +208,7 @@ function MatchingActivity({
     <div style={{ marginTop: 18 }}>
       <div className="activity-grid">
         {pairs.map((pair: any) => (
-          <div className="tile" key={pair.id}>
+          <div className="tile animate-in" key={pair.id}>
             <div>{pair.left.value}</div>
             <select
               style={{ marginTop: 12, width: "100%" }}
@@ -261,7 +313,7 @@ function TypingActivity({
   return (
     <div className="list" style={{ marginTop: 18 }}>
       {prompts.map((prompt: any) => (
-        <div className="tile" key={prompt.id}>
+        <div className="tile animate-in" key={prompt.id}>
           <label className="field">
             <span>{prompt.question}</span>
             <input
@@ -278,4 +330,3 @@ function TypingActivity({
     </div>
   );
 }
-

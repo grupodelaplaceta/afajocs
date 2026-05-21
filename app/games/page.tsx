@@ -92,9 +92,14 @@ export default async function GamesPage() {
               <p className="muted">
                 {typeLabel(game.type)} · {game.gradeMin}º a {game.gradeMax}º · {game.difficulty}
               </p>
-              <Link className="button secondary" href={`/play/${game._id}`}>
-                <BookOpen size={18} /> Jugar
-              </Link>
+              <div className="toolbar" style={{ justifyContent: "stretch" }}>
+                <Link className="button ghost" href={`/games/${game._id}`}>
+                  Detalle
+                </Link>
+                <Link className="button secondary" href={`/play/${game._id}`}>
+                  <BookOpen size={18} /> Jugar
+                </Link>
+              </div>
             </article>
           ))}
           {games.length === 0 && (
@@ -108,4 +113,3 @@ export default async function GamesPage() {
     </main>
   );
 }
-
