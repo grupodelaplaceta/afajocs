@@ -361,17 +361,15 @@ export default async function TeacherPage() {
                   <textarea
                     name="gameImport"
                     required
-                    placeholder={`TITULO: Animales y habitats
-ASIGNATURA: Ciencias
-TIPO: matching
+                    placeholder={`TITOL: Animals
+ASSIGNATURA: Llengua
+TIPO: word_search
 CURSOS: 1-3
-DIFICULTAD: easy
-TIEMPO: 90
-INSTRUCCIONES: Relaciona cada animal con su habitat.
-PARES:
-Pez = Mar
-Conejo = Bosque
-Aguila = Cielo`}
+DIFICULTAT: easy
+TIEMPO: 120
+INSTRUCCIONES: Troba les paraules amagades.
+PARAULES:
+GAT, PEIX, DOFI, OS, CASA`}
                   />
                 </div>
                 <button className="button secondary" type="submit">

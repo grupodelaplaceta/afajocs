@@ -1,3 +1,12 @@
+import { generateWordSearchGrid } from "@/lib/word-search";
+
+const demoWordSearchWords = [
+  { id: "word-1", word: "GAT" },
+  { id: "word-2", word: "OS" },
+  { id: "word-3", word: "PEIX" },
+  { id: "word-4", word: "DOFI" }
+];
+
 export const demoGameContent = {
   matching: {
     instructions: "Relaciona cada animal con su habitat.",
@@ -54,19 +63,7 @@ export const demoGameContent = {
   word_search: {
     instructions: "Troba les paraules amagades a la sopa de lletres.",
     settings: { timeLimitSeconds: 120 },
-    grid: [
-      "GATXPM",
-      "AQOSES",
-      "TBRLRO",
-      "AOVLAC",
-      "RSDOFI",
-      "PEIXNU"
-    ],
-    words: [
-      { id: "word-1", word: "GAT" },
-      { id: "word-2", word: "OS" },
-      { id: "word-3", word: "PEIX" },
-      { id: "word-4", word: "DOFI" }
-    ]
+    grid: generateWordSearchGrid(demoWordSearchWords),
+    words: demoWordSearchWords
   }
 };

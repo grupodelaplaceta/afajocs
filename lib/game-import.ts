@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { generateWordSearchGrid, normalizeWordSearchWord } from "@/lib/word-search";
 
 const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search"] as const;
 const difficulties = ["easy", "medium", "hard"] as const;
@@ -57,11 +58,16 @@ Si type es "word_search", content debe ser:
 {
   "instructions": "Troba les paraules amagades.",
   "settings": { "timeLimitSeconds": 120 },
-  "grid": ["GATXX", "AOPXX", "TSEIX", "XXDOF", "XXIXX"],
   "words": [
     { "id": "word-1", "word": "GAT" },
     { "id": "word-2", "word": "PEIX" }
   ]
+}
+
+La plataforma pot generar la graella automaticament si envies "words" sense "grid".
+També pots enviar una graella ja feta:
+{
+  "grid": ["GATXX", "AOPXX", "TSEIX", "XXDOF", "XXIXX"]
 }`;
 
 const baseImportSchema = z.object({
@@ -84,9 +90,35 @@ export function parseImportedGame(raw: string): ImportedGame {
   }
 
   const parsed = trimmed.startsWith("{") ? JSON.parse(trimmed) : parseStructuredText(trimmed);
-  const game = baseImportSchema.parse(parsed);
+  const game = ensureGeneratedWordSearchGrid(baseImportSchema.parse(parsed));
   validateContent(game);
   return game;
+}
+
+function ensureGeneratedWordSearchGrid(game: ImportedGame): ImportedGame {
+  if (game.type !== "word_search") {
+    return game;
+  }
+
+  const words = Array.isArray(game.content.words)
+    ? game.content.words.map((entry: any, index: number) => ({
+        id: String(entry.id || `word-${index + 1}`),
+        word: normalizeWordSearchWord(String(entry.word || entry))
+      }))
+    : [];
+
+  const existingGrid = Array.isArray(game.content.grid)
+    ? game.content.grid.map((row) => String(row).replace(/\s+/g, "").toUpperCase()).filter(Boolean)
+    : [];
+
+  return {
+    ...game,
+    content: {
+      ...game.content,
+      words,
+      grid: existingGrid.length ? existingGrid : generateWordSearchGrid(words)
+    }
+  };
 }
 
 function parseStructuredText(raw: string) {
@@ -119,16 +151,16 @@ function parseStructuredText(raw: string) {
     }
   }
 
-  const type = normalizeType(fields.get("tipo") || "matching");
+  const type = normalizeType(fields.get("tipo") || fields.get("tipus") || "matching");
   const gradeRange = parseGradeRange(fields.get("cursos") || "1-6");
   const base = {
-    title: fields.get("titulo") || "Juego importado",
-    subject: fields.get("asignatura") || "General",
+    title: fields.get("titulo") || fields.get("titol") || "Joc importat",
+    subject: fields.get("asignatura") || fields.get("assignatura") || "General",
     type,
     gradeMin: gradeRange.gradeMin,
     gradeMax: gradeRange.gradeMax,
-    difficulty: normalizeDifficulty(fields.get("dificultad") || "easy"),
-    estimatedTimeSeconds: Number(fields.get("tiempo") || 90)
+    difficulty: normalizeDifficulty(fields.get("dificultad") || fields.get("dificultat") || "easy"),
+    estimatedTimeSeconds: Number(fields.get("tiempo") || fields.get("temps") || 90)
   };
 
   if (type === "matching") {
@@ -144,7 +176,7 @@ function parseStructuredText(raw: string) {
     return {
       ...base,
       content: {
-        instructions: fields.get("instrucciones") || "Relaciona cada elemento.",
+        instructions: fields.get("instrucciones") || fields.get("instruccions") || "Relaciona cada element.",
         settings: { timeLimitSeconds: base.estimatedTimeSeconds, shuffle: true, instantFeedback: true },
         pairs
       }
@@ -172,7 +204,7 @@ function parseStructuredText(raw: string) {
     return {
       ...base,
       content: {
-        instructions: fields.get("instrucciones") || "Completa las frases.",
+        instructions: fields.get("instrucciones") || fields.get("instruccions") || "Completa les frases.",
         settings: { timeLimitSeconds: base.estimatedTimeSeconds, interaction: "select" },
         text: fields.get("texto") || "Completa {{blank:1}}.",
         blanks,
@@ -195,9 +227,9 @@ function parseStructuredText(raw: string) {
     return {
       ...base,
       content: {
-        instructions: fields.get("instrucciones") || "Troba les paraules amagades.",
+        instructions: fields.get("instrucciones") || fields.get("instruccions") || "Troba les paraules amagades.",
         settings: { timeLimitSeconds: base.estimatedTimeSeconds },
-        grid,
+        grid: grid.length ? grid : generateWordSearchGrid(words),
         words
       }
     };
@@ -215,7 +247,7 @@ function parseStructuredText(raw: string) {
   return {
     ...base,
     content: {
-      instructions: fields.get("instrucciones") || "Escribe la respuesta correcta.",
+      instructions: fields.get("instrucciones") || fields.get("instruccions") || "Escriu la resposta correcta.",
       settings: {
         timeLimitSeconds: base.estimatedTimeSeconds,
         caseSensitive: false,
