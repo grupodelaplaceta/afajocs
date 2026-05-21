@@ -6,7 +6,6 @@ import {
   Gamepad2,
   GraduationCap,
   Library,
-  LogOut,
   Play,
   Plus,
   Upload,
@@ -22,14 +21,13 @@ import {
   createStudentAction,
   deleteGameAction,
   importGameAction,
-  logoutAction,
   updateClassAction
 } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { aiGamePrompt } from "@/lib/game-import";
 import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
 import { AiPromptBox } from "@/components/AiPromptBox";
-import { BrandLogo } from "@/components/BrandLogo";
+import { TopNav } from "@/components/TopNav";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -103,22 +101,11 @@ export default async function TeacherPage() {
   return (
     <main className="page">
       <div className="shell">
-        <header className="topbar">
-          <div>
-            <BrandLogo label="Panel profesor" />
-            <p className="muted">Hola, {session.name}. Cada secció té la seva pròpia finestra.</p>
-          </div>
-          <div className="toolbar">
-            <Link className="button black" href="/games">
-              <Library size={18} /> Biblioteca
-            </Link>
-            <form action={logoutAction}>
-              <button className="button ghost" type="submit">
-                <LogOut size={18} /> Salir
-              </button>
-            </form>
-          </div>
-        </header>
+        <TopNav
+          session={session}
+          title="Panell professor"
+          subtitle={`Hola, ${session.name}. Cada secció té la seva pròpia finestra.`}
+        />
 
         <div className="teacher-tabs">
           {tabs.map((tab, index) => (

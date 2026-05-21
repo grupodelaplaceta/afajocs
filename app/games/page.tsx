@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Gamepad2, LogOut } from "lucide-react";
+import { BookOpen, Gamepad2 } from "lucide-react";
 import { getSession, getStudentByUserIdOrEmail } from "@/lib/auth";
-import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
-import { BrandLogo } from "@/components/BrandLogo";
+import { TopNav } from "@/components/TopNav";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -41,33 +40,11 @@ export default async function GamesPage() {
   return (
     <main className="page">
       <div className="shell">
-        <header className="topbar">
-          <div>
-            <BrandLogo label="Biblioteca de jocs" />
-            <p className="muted">
-              Tots els jocs publicats, preparats per a l'aula, la tauleta o casa.
-            </p>
-          </div>
-          <div className="toolbar">
-            <Link
-              className="button ghost"
-              href={session?.role === "teacher" ? "/teacher" : session?.role === "student" ? "/student" : "/"}
-            >
-              <ArrowLeft size={18} /> Tornar
-            </Link>
-            {session ? (
-              <form action={logoutAction}>
-                <button className="button black" type="submit">
-                  <LogOut size={18} /> Salir
-                </button>
-              </form>
-            ) : (
-              <Link className="button" href="/login">
-                Entrar
-              </Link>
-            )}
-          </div>
-        </header>
+        <TopNav
+          session={session}
+          title="Biblioteca de jocs"
+          subtitle="Tots els jocs publicats, preparats per a l'aula, la tauleta o casa."
+        />
 
         <section className="hero library-hero">
           <p className="eyebrow">Jocs publicats</p>

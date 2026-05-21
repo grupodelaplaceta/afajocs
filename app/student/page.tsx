@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { BookOpen, Library, LogOut, Trophy } from "lucide-react";
+import { BookOpen, Library, Trophy } from "lucide-react";
 import { getStudentByUserIdOrEmail, requireUser } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Challenge, Game, GameAttempt, StudentGameRecord } from "@/lib/models";
-import { BrandLogo } from "@/components/BrandLogo";
+import { TopNav } from "@/components/TopNav";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -58,22 +58,11 @@ export default async function StudentPage() {
   return (
     <main className="page">
       <div className="shell">
-        <header className="topbar">
-          <div>
-            <BrandLogo label="Panell alumne" />
-            <p className="muted">Hola, {student.name}. Els teus jocs i rècords viuen aquí.</p>
-          </div>
-          <form action={logoutAction}>
-            <div className="toolbar">
-              <Link className="button black" href="/games">
-                <Library size={18} /> Biblioteca
-              </Link>
-              <button className="button ghost" type="submit">
-                <LogOut size={18} /> Salir
-              </button>
-            </div>
-          </form>
-        </header>
+        <TopNav
+          session={session}
+          title="Panell alumne"
+          subtitle={`Hola, ${student.name}. Els teus jocs i rècords viuen aquí.`}
+        />
 
         <section className="grid grid-3">
           <article className="card stat">
@@ -154,17 +143,16 @@ export default async function StudentPage() {
           <section className="tab-panel student-tab-content student-punts grid grid-2">
           <div className="panel">
             <h2>Rècords</h2>
-            <div className="list" style={{ marginTop: 14 }}>
-              {data.records.map((record: { _id: string; bestScore: number; bestTimeSeconds: number; gameId?: { title?: string } }) => (
-                <div className="row" key={record._id}>
-                  <div>
+            <div className="record-list" style={{ marginTop: 14 }}>
+              {data.records.map((record: { _id: string; bestScore: number; bestTimeSeconds: number; gameId?: { title?: string } }, index: number) => (
+                <article className="record-row" key={record._id}>
+                  <div className="record-rank">{index + 1}</div>
+                  <div className="record-main">
                     <strong>{record.gameId?.title || "joc eliminat"}</strong>
-                    <div className="muted">{record.bestTimeSeconds}s</div>
+                    <p className="muted">Millor temps: {record.bestTimeSeconds}s</p>
                   </div>
-                  <span className="badge cyan">
-                    <Trophy size={14} /> {record.bestScore}
-                  </span>
-                </div>
+                  <span className="score-pill"><Trophy size={14} /> {record.bestScore} pts</span>
+                </article>
               ))}
               {data.records.length === 0 && <p className="muted">Juga una partida per estrenar rècords.</p>}
             </div>

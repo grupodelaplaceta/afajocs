@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Clock, Medal, Play, Trophy } from "lucide-react";
+import { BookOpen, Clock, Medal, Play, Trophy } from "lucide-react";
 import { getSession, getStudentByUserIdOrEmail, getTeacherByUserId } from "@/lib/auth";
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { getGameRecordViews } from "@/lib/record-views";
-import { BrandLogo } from "@/components/BrandLogo";
+import { TopNav } from "@/components/TopNav";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -55,20 +55,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
   return (
     <main className="page">
       <div className="shell">
-        <header className="topbar">
-          <div>
-            <BrandLogo label="Detall de l'activitat" />
-            <p className="muted">Consulta rècords abans de jugar.</p>
-          </div>
-          <div className="toolbar">
-            <Link className="button ghost" href="/games">
-              <ArrowLeft size={18} /> Biblioteca
-            </Link>
-            <Link className="button secondary" href={`/play/${gameId}`}>
-              <Play size={18} /> Jugar
-            </Link>
-          </div>
-        </header>
+        <TopNav session={session} title="Detall de l'activitat" subtitle="Consulta rècords abans de jugar." />
 
         <section className="hero animate-in">
           <p className="eyebrow">{data.game.subject}</p>
@@ -124,20 +111,31 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
         </section>
 
         <section className="panel" style={{ marginTop: 18 }}>
-          <h2>Rècords per grup</h2>
-          <div className="game-card-grid" style={{ marginTop: 18 }}>
+          <div className="row" style={{ border: 0, padding: 0 }}>
+            <div>
+              <h2>Rècords per grup</h2>
+              <p className="muted">Classificació clara per veure qui ha marcat el millor resultat.</p>
+            </div>
+            <Link className="button secondary" href={`/play/${gameId}`}>
+              <Play size={18} /> Jugar
+            </Link>
+          </div>
+          <div className="record-list" style={{ marginTop: 18 }}>
             {data.recordViews.classRecords.map((record: any) => (
-              <article className="record-card" key={record.classId}>
-                <Trophy size={30} />
-                <div>
-                  <span className="eyebrow">{record.className}</span>
-                  <h2>{record.bestScore ? `${record.bestScore} pts` : "Sense rècord"}</h2>
+              <article className="record-row" key={record.classId}>
+                <div className="record-rank">
+                  <Trophy size={20} />
+                </div>
+                <div className="record-main">
+                  <strong>{record.className}</strong>
                   <p className="muted">
                     {record.studentName
-                      ? `${record.studentName} · ${record.bestTimeSeconds}s`
+                      ? `Millor alumne: ${record.studentName}`
                       : `Cursos ${record.gradeLevels.map((grade: number) => `${grade}º`).join(" + ") || "mixtos"}`}
                   </p>
                 </div>
+                <span className="score-pill">{record.bestScore ? `${record.bestScore} pts` : "Sense rècord"}</span>
+                <span className="time-pill">{record.bestTimeSeconds ? `${record.bestTimeSeconds}s` : "-"}</span>
               </article>
             ))}
             {data.recordViews.classRecords.length === 0 && (

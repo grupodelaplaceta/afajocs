@@ -669,6 +669,61 @@ p {
   font-size: clamp(1.7rem, 3vw, 2.4rem);
 }
 
+.record-list {
+  display: grid;
+  gap: 10px;
+}
+
+.record-row {
+  align-items: center;
+  background: var(--brand-white);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  min-height: 76px;
+  padding: 12px;
+}
+
+.record-rank {
+  align-items: center;
+  background: var(--brand-black);
+  border-radius: 14px;
+  color: var(--brand-white);
+  display: inline-flex;
+  font-weight: 900;
+  height: 46px;
+  justify-content: center;
+  width: 46px;
+}
+
+.record-main p {
+  margin: 4px 0 0;
+}
+
+.score-pill,
+.time-pill {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.score-pill {
+  background: var(--brand-orange);
+  color: var(--brand-white);
+}
+
+.time-pill {
+  background: var(--brand-cyan);
+  color: var(--brand-white);
+}
+
 .record-card.featured {
   border-color: var(--brand-purple);
   animation: fadeLift 260ms ease both, brandPulse 1800ms ease-in-out infinite;
@@ -925,6 +980,16 @@ p {
   .row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .record-row {
+    align-items: stretch;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .score-pill,
+  .time-pill {
+    justify-content: center;
   }
 
   .choice-grid {
