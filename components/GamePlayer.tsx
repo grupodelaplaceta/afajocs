@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Clock, Medal, Sparkles, Trophy } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
@@ -52,15 +52,31 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
   const [finished, setFinished] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(1);
 
   const totalItems = useMemo(() => getTotalItems(game), [game]);
-  const timeSpentSeconds = startedAt ? Math.max(1, Math.round((Date.now() - startedAt) / 1000)) : 1;
+  const timeSpentSeconds = started ? elapsedSeconds : 1;
   const personalRecord = records.find((record) => record.studentId === selectedStudentId);
   const activeStudent = students.find((student) => student._id === selectedStudentId);
+
+  useEffect(() => {
+    if (!started || !startedAt || finished) {
+      return;
+    }
+
+    const updateElapsed = () => {
+      setElapsedSeconds(Math.max(1, Math.floor((Date.now() - startedAt) / 1000)));
+    };
+
+    updateElapsed();
+    const intervalId = window.setInterval(updateElapsed, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [finished, started, startedAt]);
 
   function start() {
     setStarted(true);
     setStartedAt(Date.now());
+    setElapsedSeconds(1);
   }
 
   function finish(result: { correct: number; wrong: number }) {
