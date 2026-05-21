@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOut, Trophy } from "lucide-react";
+import { Library, LogOut, Trophy } from "lucide-react";
 import { getStudentByUserIdOrEmail, requireUser } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
@@ -62,9 +62,14 @@ export default async function StudentPage() {
             <p className="muted">Hola, {student.name}. Tus juegos y records viven aqui.</p>
           </div>
           <form action={logoutAction}>
-            <button className="button ghost" type="submit">
-              <LogOut size={18} /> Salir
-            </button>
+            <div className="toolbar">
+              <Link className="button black" href="/games">
+                <Library size={18} /> Biblioteca
+              </Link>
+              <button className="button ghost" type="submit">
+                <LogOut size={18} /> Salir
+              </button>
+            </div>
           </form>
         </header>
 

@@ -91,14 +91,14 @@ export async function logoutAction() {
 
 const classSchema = z.object({
   name: z.string().min(2).max(120),
-  gradeLevel: z.coerce.number().min(1).max(6)
+  gradeLevels: z.array(z.coerce.number().min(1).max(6)).min(1)
 });
 
 export async function createClassAction(formData: FormData) {
   const session = await requireUser("teacher");
   const parsed = classSchema.parse({
     name: formData.get("name"),
-    gradeLevel: formData.get("gradeLevel")
+    gradeLevels: formData.getAll("gradeLevels")
   });
   const teacher = await getTeacherByUserId(session.id);
   if (!teacher) {
@@ -108,7 +108,8 @@ export async function createClassAction(formData: FormData) {
   await ClassGroup.create({
     teacherId: teacher._id,
     name: parsed.name,
-    gradeLevel: parsed.gradeLevel,
+    gradeLevel: parsed.gradeLevels[0],
+    gradeLevels: parsed.gradeLevels,
     studentIds: []
   });
 
@@ -156,6 +157,7 @@ export async function createStudentAction(formData: FormData) {
   }
 
   revalidatePath("/teacher");
+  revalidatePath("/games");
 }
 
 const gameSchema = z.object({
@@ -195,6 +197,7 @@ export async function createGameAction(formData: FormData) {
   });
 
   revalidatePath("/teacher");
+  revalidatePath("/games");
 }
 
 export async function importGameAction(formData: FormData) {
@@ -221,6 +224,7 @@ export async function importGameAction(formData: FormData) {
   });
 
   revalidatePath("/teacher");
+  revalidatePath("/games");
 }
 
 const attemptSchema = z.object({

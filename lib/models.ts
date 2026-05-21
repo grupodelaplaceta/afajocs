@@ -34,7 +34,8 @@ const classSchema = new Schema(
   {
     teacherId: { type: Schema.Types.ObjectId, ref: "Teacher", required: true },
     name: { type: String, required: true, trim: true },
-    gradeLevel: { type: Number, min: 1, max: 6, required: true },
+    gradeLevel: { type: Number, min: 1, max: 6 },
+    gradeLevels: [{ type: Number, min: 1, max: 6 }],
     colorTheme: { type: String, default: "brand-purple" },
     studentIds: [{ type: Schema.Types.ObjectId, ref: "Student" }]
   },
@@ -116,4 +117,3 @@ export const GameAttempt =
 export const StudentGameRecord =
   (models.StudentGameRecord as Model<RecordDoc>) ||
   model("StudentGameRecord", recordSchema);
-

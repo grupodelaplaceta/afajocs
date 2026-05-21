@@ -64,6 +64,14 @@ select {
   margin-bottom: clamp(18px, 3vw, 32px);
 }
 
+.toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .brand {
   align-items: center;
   display: flex;
@@ -235,6 +243,14 @@ p {
   gap: 12px;
 }
 
+.form-wide {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.form-wide .button {
+  align-self: end;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -299,6 +315,69 @@ p {
   gap: 10px;
 }
 
+.tabs {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  margin-bottom: 18px;
+  padding: 8px;
+}
+
+.tab {
+  align-items: center;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 0 14px;
+}
+
+.tab.active {
+  background: var(--brand-black);
+  border-color: var(--brand-cyan);
+  color: var(--brand-white);
+}
+
+.tab-panel {
+  margin-top: 18px;
+}
+
+.choice-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.choice {
+  align-items: center;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  font-weight: 900;
+  gap: 10px;
+  min-height: var(--touch-target);
+  padding: 0 12px;
+}
+
+.choice:has(input:checked) {
+  background: var(--brand-black);
+  border-color: var(--brand-cyan);
+  color: var(--brand-white);
+}
+
+.choice input {
+  accent-color: var(--brand-cyan);
+  height: 22px;
+  width: 22px;
+}
+
 .row {
   align-items: center;
   border: 1px solid var(--line);
@@ -333,6 +412,51 @@ p {
 .game-page {
   background: var(--brand-black);
   color: var(--brand-white);
+}
+
+.library-hero {
+  background: var(--brand-black);
+}
+
+.game-card-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.game-card {
+  background: var(--brand-white);
+  border: 3px solid var(--brand-purple);
+  border-radius: 8px;
+  color: var(--brand-black);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 270px;
+  padding: clamp(18px, 2.4vw, 28px);
+}
+
+.game-card:nth-child(2n) {
+  border-color: var(--brand-cyan);
+}
+
+.game-card:nth-child(3n) {
+  border-color: var(--brand-orange);
+}
+
+.game-card-icon {
+  align-items: center;
+  background: var(--brand-black);
+  border-radius: 8px;
+  color: var(--brand-white);
+  display: inline-flex;
+  height: 62px;
+  justify-content: center;
+  width: 62px;
+}
+
+.game-card .button {
+  margin-top: auto;
 }
 
 .game-board {
@@ -450,8 +574,13 @@ p {
 
   .topbar nav,
   .topbar form,
+  .toolbar,
   .topbar .button {
     width: 100%;
+  }
+
+  .toolbar {
+    justify-content: stretch;
   }
 
   .progress-track {
@@ -465,6 +594,10 @@ p {
   .row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

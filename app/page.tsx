@@ -27,6 +27,9 @@ export default async function HomePage() {
                 <Link className="button ghost" href="/login">
                   Iniciar sesion
                 </Link>
+                <Link className="button secondary" href="/games">
+                  Juegos
+                </Link>
                 <Link className="button" href="/register">
                   Crear cuenta
                 </Link>
@@ -68,4 +71,3 @@ export default async function HomePage() {
     </main>
   );
 }
-
