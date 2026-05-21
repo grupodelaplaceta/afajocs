@@ -288,6 +288,11 @@ p {
   color: var(--brand-black);
 }
 
+.compact-button {
+  min-height: 44px;
+  padding: 0 14px;
+}
+
 .form {
   display: grid;
   gap: 12px;
@@ -579,6 +584,29 @@ p {
   border-radius: 8px;
   color: var(--brand-black);
   padding: clamp(18px, 3vw, 36px);
+  position: relative;
+}
+
+.countdown-layer {
+  align-items: center;
+  background: rgba(16, 16, 20, 0.94);
+  border: 12px solid var(--brand-cyan);
+  border-radius: 8px;
+  color: var(--brand-white);
+  display: grid;
+  inset: 0;
+  min-height: 100%;
+  place-items: center;
+  position: absolute;
+  z-index: 20;
+}
+
+.countdown-number {
+  animation: brandPulse 700ms ease-in-out infinite;
+  color: var(--brand-orange);
+  font-size: clamp(5rem, 18vw, 15rem);
+  font-weight: 900;
+  line-height: 1;
 }
 
 .record-grid {

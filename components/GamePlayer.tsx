@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Clock, Medal, Sparkles, Trophy } from "lucide-react";
+import { Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
 
@@ -53,6 +53,8 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [wrongAnswers, setWrongAnswers] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(1);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const totalItems = useMemo(() => getTotalItems(game), [game]);
   const timeSpentSeconds = started ? elapsedSeconds : 1;
@@ -73,10 +75,32 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
     return () => window.clearInterval(intervalId);
   }, [finished, started, startedAt]);
 
+  useEffect(() => {
+    const updateFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", updateFullscreen);
+    updateFullscreen();
+    return () => document.removeEventListener("fullscreenchange", updateFullscreen);
+  }, []);
+
+  useEffect(() => {
+    if (countdown === null) {
+      return;
+    }
+
+    if (countdown <= 0) {
+      setCountdown(null);
+      setStarted(true);
+      setStartedAt(Date.now());
+      setElapsedSeconds(1);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setCountdown((value) => (value ?? 1) - 1), 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, [countdown]);
+
   function start() {
-    setStarted(true);
-    setStartedAt(Date.now());
-    setElapsedSeconds(1);
+    setCountdown(3);
   }
 
   function finish(result: { correct: number; wrong: number }) {
@@ -85,9 +109,23 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
     setFinished(true);
   }
 
+  async function toggleFullscreen() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await document.documentElement.requestFullscreen();
+  }
+
   if (!started) {
     return (
       <div className="game-board animate-in">
+        {countdown !== null && (
+          <div className="countdown-layer" aria-live="assertive">
+            <div className="countdown-number">{countdown > 0 ? countdown : "¡Ya!"}</div>
+          </div>
+        )}
         <p className="eyebrow">Preparacion</p>
         <h1 style={{ color: "#101014", fontSize: "clamp(2rem, 5vw, 4rem)" }}>{game.title}</h1>
         <p className="muted">{String(game.content.instructions || "Completa la actividad.")}</p>
@@ -138,9 +176,15 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
           ))}
         </div>
 
-        <button className="button secondary" disabled={!selectedStudentId} onClick={start}>
-          <Sparkles size={18} /> Empezar
-        </button>
+        <div className="toolbar" style={{ justifyContent: "flex-start", marginTop: 18 }}>
+          <button className="button black" type="button" onClick={toggleFullscreen}>
+            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            {isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+          </button>
+          <button className="button secondary" disabled={!selectedStudentId || countdown !== null} onClick={start}>
+            <Sparkles size={18} /> Empezar
+          </button>
+        </div>
       </div>
     );
   }
@@ -156,6 +200,10 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
           <span className="badge orange">
             <Clock size={14} /> {timeSpentSeconds}s
           </span>
+          <button className="button ghost compact-button" type="button" onClick={toggleFullscreen}>
+            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            {isFullscreen ? "Salir" : "Pantalla completa"}
+          </button>
           <div className="progress-track">
             <div className="progress-fill" />
           </div>
