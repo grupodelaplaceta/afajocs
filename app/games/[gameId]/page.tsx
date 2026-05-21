@@ -5,7 +5,6 @@ import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { getGameRecordViews } from "@/lib/record-views";
 import { TopNav } from "@/components/TopNav";
-import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -75,11 +74,6 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
             </span>
           </div>
         </section>
-
-        <JicGuide
-          compact
-          message="Abans de començar pots mirar el rècord global, el teu rècord i els millors resultats per grup."
-        />
 
         <section className="record-grid" style={{ marginTop: 18 }}>
           <article className="record-card featured">

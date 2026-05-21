@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, Gamepad2, GraduationCap, Trophy } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { BrandLogo } from "@/components/BrandLogo";
-import { JicGuide } from "@/components/JicGuide";
 
 export default async function HomePage() {
   const session = await getSession();
@@ -44,11 +43,6 @@ export default async function HomePage() {
             Començar <ArrowRight size={18} />
           </Link>
         </section>
-
-        <JicGuide
-          tone="cyan"
-          message="Hola! Soc en Jic. T'acompanyaré per triar activitats, escoltar instruccions i saber què toca fer a cada pantalla."
-        />
 
         <section className="grid grid-3" style={{ marginTop: 18 }}>
           <article className="card stat">

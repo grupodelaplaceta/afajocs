@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { Volume2 } from "lucide-react";
-import { speakText, warmVoices } from "@/lib/client-audio";
-
-let lastAutoSpeechAt = 0;
+import { speakText } from "@/lib/client-audio";
 
 type Props = {
   title?: string;
@@ -13,24 +10,9 @@ type Props = {
   compact?: boolean;
 };
 
-export function JicGuide({ title = "Soc en Jic", message, tone = "purple", compact = false }: Props) {
-  useEffect(() => {
-    warmVoices();
-    const now = Date.now();
-    if (now - lastAutoSpeechAt < 3500) {
-      return;
-    }
-
-    lastAutoSpeechAt = now;
-    const timeoutId = window.setTimeout(() => {
-      speakText(`${title}. ${message}`, "jic");
-    }, compact ? 450 : 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [compact, message, title]);
-
+export function JicGuide({ title = "Jic", message, tone = "purple", compact = false }: Props) {
   function speak() {
-    speakText(`${title}. ${message}`, "jic");
+    speakText(message, "jic");
   }
 
   return (
@@ -45,7 +27,7 @@ export function JicGuide({ title = "Soc en Jic", message, tone = "purple", compa
         <p>{message}</p>
       </div>
       <button className="button ghost compact-button" type="button" onClick={speak}>
-        <Volume2 size={18} /> Escoltar Jic
+        <Volume2 size={18} /> Escoltar
       </button>
     </aside>
   );

@@ -5,7 +5,6 @@ import { logoutAction } from "@/lib/actions";
 import { connectDb } from "@/lib/db";
 import { Challenge, Game, GameAttempt, StudentGameRecord } from "@/lib/models";
 import { TopNav } from "@/components/TopNav";
-import { JicGuide } from "@/components/JicGuide";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -63,11 +62,6 @@ export default async function StudentPage() {
           session={session}
           title="Panell alumne"
           subtitle={`Hola, ${student.name}. Els teus Jics i rècords viuen aquí.`}
-        />
-
-        <JicGuide
-          tone="cyan"
-          message={`Hola, ${student.name}! Soc en Jic. Mira els teus deures, tria un Jic i jo t'ajudaré amb instruccions i veu quan juguis.`}
         />
 
         <section className="grid grid-3">

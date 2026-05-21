@@ -28,7 +28,6 @@ import { aiGamePrompt } from "@/lib/game-import";
 import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } from "@/lib/models";
 import { AiPromptBox } from "@/components/AiPromptBox";
 import { TopNav } from "@/components/TopNav";
-import { JicGuide } from "@/components/JicGuide";
 import { JicCard, getJicTypeMeta } from "@/components/JicCard";
 import { SubmitButton } from "@/components/SubmitButton";
 
@@ -146,11 +145,6 @@ export default async function TeacherPage() {
           session={session}
           title="Panell professor"
           subtitle={`Hola, ${session.name}. Cada secció té la seva pròpia finestra.`}
-        />
-
-        <JicGuide
-          tone="purple"
-          message={`Hola, ${session.name}! Soc en Jic. Et guiaré per crear Jics, assignar reptes i revisar com avança cada alumne.`}
         />
 
         <div className="teacher-tabs">

@@ -4,7 +4,6 @@ import { getSession, getStudentByUserIdOrEmail } from "@/lib/auth";
 import { connectDb } from "@/lib/db";
 import { Game } from "@/lib/models";
 import { TopNav } from "@/components/TopNav";
-import { JicGuide } from "@/components/JicGuide";
 import { JicCard } from "@/components/JicCard";
 
 function asPlain(value: unknown): any {
@@ -55,11 +54,6 @@ export default async function GamesPage() {
             Targetes grans, filtres visuals per curs i accés directe a cada Jic.
           </p>
         </section>
-
-        <JicGuide
-          tone="orange"
-          message="Busca un Jic pel teu curs, mira el detall si vols veure els rècords i prem jugar quan estiguis a punt."
-        />
 
         <section className="published-jics">
           <div className="jic-library-summary">

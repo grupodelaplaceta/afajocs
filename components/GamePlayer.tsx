@@ -5,7 +5,6 @@ import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Music, Sparkles, 
 import { saveAttemptAction } from "@/lib/actions";
 import { playUiSound, speakText, warmVoices } from "@/lib/client-audio";
 import { normalizeAnswer } from "@/lib/scoring";
-import { JicGuide } from "@/components/JicGuide";
 import { SubmitButton } from "@/components/SubmitButton";
 
 type StudentOption = {
@@ -205,12 +204,6 @@ export function GamePlayer({
           </button>
         </div>
 
-        <JicGuide
-          compact
-          tone="orange"
-          message="Quan premis començar faré el compte enrere. Llegeix o escolta les instruccions i intenta superar el teu rècord."
-        />
-
         {mode === "classroom" && (
           <div className="field" style={{ margin: "18px 0" }}>
             <label>Qui juga ara?</label>
@@ -308,8 +301,6 @@ export function GamePlayer({
             <Volume2 size={18} /> Escoltar
           </button>
         </div>
-        <JicGuide compact tone="cyan" message="Jo et marco la missió. Si veus un botó d'escoltar, el pots prémer per sentir paraules i enunciats." />
-
         {!finished && game.type === "matching" && <MatchingActivity game={game} onFinish={finish} />}
         {!finished && game.type === "fill_blanks" && (
           <FillBlanksActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speakWord} />
