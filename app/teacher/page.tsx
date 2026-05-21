@@ -45,13 +45,7 @@ function gradeLabel(group: { gradeLevels?: number[]; gradeLevel?: number }) {
   return grades.map((grade) => `${grade}º`).join(" + ") || "Mixto";
 }
 
-export default async function TeacherPage({
-  searchParams
-}: {
-  searchParams: Promise<{ tab?: string }>;
-}) {
-  const query = await searchParams;
-  const activeTab = tabs.some((tab) => tab.id === query.tab) ? query.tab || "resumen" : "resumen";
+export default async function TeacherPage() {
   const session = await requireUser("teacher");
   await connectDb();
   const teacher = await getTeacherByUserId(session.id);
@@ -95,23 +89,30 @@ export default async function TeacherPage({
           </div>
         </header>
 
-        <nav className="tabs" aria-label="Secciones del panel docente">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <Link
-                key={tab.id}
-                className={`tab ${activeTab === tab.id ? "active" : ""}`}
-                href={`/teacher?tab=${tab.id}`}
-              >
-                <Icon size={18} /> {tab.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="teacher-tabs">
+          {tabs.map((tab, index) => (
+            <input
+              key={tab.id}
+              id={`tab-${tab.id}`}
+              name="teacher-tab"
+              type="radio"
+              defaultChecked={index === 0}
+            />
+          ))}
 
-        {activeTab === "resumen" && (
-          <section className="tab-panel">
+          <nav className="tabs" aria-label="Secciones del panel docente">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <label key={tab.id} className="tab" htmlFor={`tab-${tab.id}`}>
+                  <Icon size={18} /> {tab.label}
+                </label>
+              );
+            })}
+          </nav>
+
+          <div className="tab-panels">
+            <section className="tab-panel tab-content tab-resumen">
             <div className="grid grid-3">
               <article className="card stat">
                 <Users color="#c000d8" />
@@ -130,10 +131,8 @@ export default async function TeacherPage({
               </article>
             </div>
           </section>
-        )}
 
-        {activeTab === "clases" && (
-          <section className="tab-panel grid grid-2">
+          <section className="tab-panel tab-content tab-clases grid grid-2">
             <div className="panel">
               <h2>Crear grupo</h2>
               <p className="muted">Puedes combinar cursos, por ejemplo 1º + 2º o ciclo medio.</p>
@@ -213,10 +212,8 @@ export default async function TeacherPage({
               </div>
             </div>
           </section>
-        )}
 
-        {activeTab === "alumnos" && (
-          <section className="tab-panel grid grid-2">
+          <section className="tab-panel tab-content tab-alumnos grid grid-2">
             <div className="panel">
               <h2>Añadir alumno</h2>
               <form className="form" action={createStudentAction}>
@@ -271,10 +268,8 @@ export default async function TeacherPage({
               </div>
             </div>
           </section>
-        )}
 
-        {activeTab === "crear" && (
-          <section className="tab-panel panel">
+          <section className="tab-panel tab-content tab-crear panel">
             <h2>Crear juego demo</h2>
             <p className="muted">Crea una actividad base y luego podras jugarla desde la biblioteca.</p>
             <form className="form form-wide" action={createGameAction}>
@@ -327,10 +322,8 @@ export default async function TeacherPage({
               </button>
             </form>
           </section>
-        )}
 
-        {activeTab === "importar" && (
-          <section className="tab-panel grid grid-2">
+          <section className="tab-panel tab-content tab-importar grid grid-2">
             <div className="panel">
               <AiPromptBox prompt={aiGamePrompt} />
             </div>
@@ -366,10 +359,8 @@ Aguila = Cielo`}
               </form>
             </div>
           </section>
-        )}
 
-        {activeTab === "publicados" && (
-          <section className="tab-panel panel">
+          <section className="tab-panel tab-content tab-publicados panel">
             <div className="row" style={{ border: 0, padding: 0 }}>
               <div>
                 <h2>Juegos publicados</h2>
@@ -395,7 +386,8 @@ Aguila = Cielo`}
               {data.games.length === 0 && <p className="muted">Crea o importa un juego para empezar.</p>}
             </div>
           </section>
-        )}
+          </div>
+        </div>
       </div>
     </main>
   );

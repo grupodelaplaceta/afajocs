@@ -376,6 +376,12 @@ p {
   padding: 8px;
 }
 
+.teacher-tabs > input {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
 .tab {
   align-items: center;
   border: 2px solid transparent;
@@ -389,6 +395,10 @@ p {
   transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
 
+.tab {
+  cursor: pointer;
+}
+
 .tab:active {
   transform: scale(0.98);
 }
@@ -399,8 +409,35 @@ p {
   color: var(--brand-white);
 }
 
+#tab-resumen:checked ~ .tabs label[for="tab-resumen"],
+#tab-clases:checked ~ .tabs label[for="tab-clases"],
+#tab-alumnos:checked ~ .tabs label[for="tab-alumnos"],
+#tab-crear:checked ~ .tabs label[for="tab-crear"],
+#tab-importar:checked ~ .tabs label[for="tab-importar"],
+#tab-publicados:checked ~ .tabs label[for="tab-publicados"] {
+  background: var(--brand-black);
+  border-color: var(--brand-cyan);
+  color: var(--brand-white);
+}
+
 .tab-panel {
   margin-top: 18px;
+}
+
+.tab-content {
+  display: none;
+}
+
+#tab-resumen:checked ~ .tab-panels .tab-resumen,
+#tab-crear:checked ~ .tab-panels .tab-crear,
+#tab-publicados:checked ~ .tab-panels .tab-publicados {
+  display: block;
+}
+
+#tab-clases:checked ~ .tab-panels .tab-clases,
+#tab-alumnos:checked ~ .tab-panels .tab-alumnos,
+#tab-importar:checked ~ .tab-panels .tab-importar {
+  display: grid;
 }
 
 .choice-grid {
