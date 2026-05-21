@@ -29,6 +29,7 @@ import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } 
 import { AiPromptBox } from "@/components/AiPromptBox";
 import { TopNav } from "@/components/TopNav";
 import { JicGuide } from "@/components/JicGuide";
+import { JicCard, getJicTypeMeta } from "@/components/JicCard";
 import { SubmitButton } from "@/components/SubmitButton";
 
 function asPlain(value: unknown): any {
@@ -126,6 +127,17 @@ export default async function TeacherPage() {
     const doneGames = groupRows.reduce((sum: number, row: any) => sum + row.doneGames, 0);
     return { group, students: groupRows.length, totalScore, attempts, doneGames };
   });
+  const teacherGamesBySubject = data.games.reduce((groups: Record<string, any[]>, game: any) => {
+    const key = game.subject || "General";
+    groups[key] = groups[key] || [];
+    groups[key].push(game);
+    return groups;
+  }, {});
+  const teacherSubjectNames = Object.keys(teacherGamesBySubject).sort((a, b) => a.localeCompare(b));
+  const gameTypeCounts = data.games.reduce((counts: Record<string, number>, game: any) => {
+    counts[game.type] = (counts[game.type] || 0) + 1;
+    return counts;
+  }, {});
 
   return (
     <main className="page">
@@ -617,30 +629,55 @@ PE_X=PEIX`}
             <div className="row" style={{ border: 0, padding: 0 }}>
               <div>
                 <h2>Jics publicats</h2>
-                <p className="muted">Aquí veus els teus Jics. La biblioteca mostra tots els publicats.</p>
+                <p className="muted">Organitzats per assignatura, tipus i cursos per trobar-los ràpid.</p>
               </div>
               <Link className="button black" href="/games">
                 <Library size={18} /> Veure biblioteca
               </Link>
             </div>
-            <div className="game-card-grid" style={{ marginTop: 18 }}>
-              {data.games.map((game: { _id: string; title: string; subject: string; type: string; gradeMin: number; gradeMax: number }) => (
-                <article className="game-card" key={game._id}>
-                  <span className="badge cyan">{game.subject}</span>
-                  <h3>{game.title}</h3>
-                  <p className="muted">
-                    {game.type} · {game.gradeMin}º a {game.gradeMax}º
-                  </p>
-                  <Link className="button" href={`/play/${game._id}`}>
-                    Jugar
-                  </Link>
-                  <form action={deleteGameAction}>
-                    <input type="hidden" name="gameId" value={game._id} />
-                    <SubmitButton className="button secondary" pendingText="Eliminant...">
-                      Eliminar
-                    </SubmitButton>
-                  </form>
-                </article>
+
+            <div className="jic-library-summary">
+              <span className="badge orange">{data.games.length} Jics</span>
+              <span className="badge cyan">{teacherSubjectNames.length} assignatures</span>
+              {Object.entries(gameTypeCounts).map(([type, count]) => {
+                const meta = getJicTypeMeta(type);
+                return (
+                  <span className="badge" key={type}>
+                    {meta.label}: {count as number}
+                  </span>
+                );
+              })}
+            </div>
+
+            <div className="published-jics">
+              {teacherSubjectNames.map((subject) => (
+                <section className="jic-subject-section" key={subject}>
+                  <div className="jic-section-heading">
+                    <div>
+                      <p className="eyebrow">Assignatura</p>
+                      <h2>{subject}</h2>
+                    </div>
+                    <span className="badge cyan">{teacherGamesBySubject[subject].length} Jics</span>
+                  </div>
+                  <div className="game-card-grid">
+                    {teacherGamesBySubject[subject].map((game: any) => (
+                      <JicCard compact game={game} key={game._id}>
+                        <Link className="button" href={`/play/${game._id}`}>
+                          Jugar
+                        </Link>
+                        <Link className="button ghost" href={`/games/${game._id}`}>
+                          Detall
+                        </Link>
+                        <form action={deleteGameAction}>
+                          <input type="hidden" name="gameId" value={game._id} />
+                          <SubmitButton className="button secondary" pendingText="Eliminant...">
+                            Eliminar
+                          </SubmitButton>
+                        </form>
+                      </JicCard>
+                    ))}
+                  </div>
+                </section>
               ))}
               {data.games.length === 0 && <p className="muted">Crea o importa un Jic per començar.</p>}
             </div>

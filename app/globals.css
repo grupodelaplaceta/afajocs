@@ -792,6 +792,37 @@ p {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
 
+.published-jics {
+  display: grid;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.jic-library-summary {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+}
+
+.jic-subject-section {
+  display: grid;
+  gap: 14px;
+}
+
+.jic-section-heading {
+  align-items: center;
+  border-bottom: 3px solid var(--line);
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
 .game-card {
   background: var(--brand-white);
   border: 3px solid var(--brand-purple);
@@ -805,6 +836,57 @@ p {
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
+.jic-card.purple {
+  border-color: var(--brand-purple);
+}
+
+.jic-card.cyan {
+  border-color: var(--brand-cyan);
+}
+
+.jic-card.orange {
+  border-color: var(--brand-orange);
+}
+
+.jic-card.compact {
+  min-height: 245px;
+  padding: 18px;
+}
+
+.jic-card-top {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.jic-card-badges {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.jic-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.jic-card-actions > * {
+  flex: 1 1 120px;
+}
+
+.jic-card-actions form {
+  display: flex;
+}
+
+.jic-card-actions .button {
+  width: 100%;
+}
+
 .game-card:hover {
   box-shadow: var(--shadow);
   transform: translateY(-3px);
@@ -815,6 +897,18 @@ p {
 }
 
 .game-card:nth-child(3n) {
+  border-color: var(--brand-orange);
+}
+
+.game-card.jic-card.purple {
+  border-color: var(--brand-purple);
+}
+
+.game-card.jic-card.cyan {
+  border-color: var(--brand-cyan);
+}
+
+.game-card.jic-card.orange {
   border-color: var(--brand-orange);
 }
 
@@ -831,6 +925,10 @@ p {
 
 .game-card .button {
   margin-top: auto;
+}
+
+.jic-card .button {
+  margin-top: 0;
 }
 
 .game-board {
