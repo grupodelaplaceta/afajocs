@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy } from "lucide-react";
+import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
 
@@ -27,6 +27,7 @@ type Props = {
   mode: "classroom" | "remote";
   records?: GameRecord[];
   classRecords?: ClassRecord[];
+  backHref?: string;
 };
 
 type GameRecord = {
@@ -45,7 +46,15 @@ type ClassRecord = {
   studentName: string | null;
 };
 
-export function GamePlayer({ game, students, defaultStudentId, mode, records = [], classRecords = [] }: Props) {
+export function GamePlayer({
+  game,
+  students,
+  defaultStudentId,
+  mode,
+  records = [],
+  classRecords = [],
+  backHref = "/games"
+}: Props) {
   const [selectedStudentId, setSelectedStudentId] = useState(defaultStudentId || "");
   const [started, setStarted] = useState(false);
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -118,6 +127,13 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
     await document.documentElement.requestFullscreen();
   }
 
+  async function goBack() {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+    window.location.assign(backHref);
+  }
+
   if (!started) {
     return (
       <div className="game-board animate-in">
@@ -177,6 +193,9 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
         </div>
 
         <div className="toolbar" style={{ justifyContent: "flex-start", marginTop: 18 }}>
+          <button className="button ghost" type="button" onClick={goBack}>
+            <ArrowLeft size={18} /> Volver
+          </button>
           <button className="button black" type="button" onClick={toggleFullscreen}>
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             {isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
@@ -197,6 +216,9 @@ export function GamePlayer({ game, students, defaultStudentId, mode, records = [
           <h2 style={{ marginTop: 8 }}>{game.title}</h2>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <button className="button ghost compact-button" type="button" onClick={goBack}>
+            <ArrowLeft size={18} /> Volver
+          </button>
           <span className="badge orange">
             <Clock size={14} /> {timeSpentSeconds}s
           </span>

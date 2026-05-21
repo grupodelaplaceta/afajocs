@@ -42,11 +42,13 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
 
   const recordViews = await getGameRecordViews(gameId, teacherId, defaultStudentId || undefined);
   const data = asPlain({ game, students, recordViews });
+  const backHref =
+    session?.role === "teacher" ? "/teacher" : session?.role === "student" ? "/student" : "/games";
 
   return (
     <main className="page game-page">
       <div className="shell">
-        <Link className="button ghost" href={session?.role === "student" ? "/student" : "/teacher"}>
+        <Link className="button ghost" href={backHref}>
           <ArrowLeft size={18} /> Volver
         </Link>
         <div style={{ marginTop: 18 }}>
@@ -57,6 +59,7 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
             mode={mode}
             records={data.recordViews.records}
             classRecords={data.recordViews.classRecords}
+            backHref={backHref}
           />
         </div>
       </div>
