@@ -29,6 +29,7 @@ import { Challenge, ClassGroup, Game, GameAttempt, Student, StudentGameRecord } 
 import { AiPromptBox } from "@/components/AiPromptBox";
 import { TopNav } from "@/components/TopNav";
 import { JicGuide } from "@/components/JicGuide";
+import { SubmitButton } from "@/components/SubmitButton";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -344,7 +345,9 @@ export default async function TeacherPage() {
                     ))}
                   </div>
                 </div>
-                <button className="button secondary" type="submit">Encomanar deures</button>
+                <SubmitButton className="button secondary" pendingText="Encomanant...">
+                  Encomanar deures
+                </SubmitButton>
               </form>
             </div>
 
@@ -362,7 +365,9 @@ export default async function TeacherPage() {
                     </div>
                     <form action={closeChallengeAction}>
                       <input type="hidden" name="challengeId" value={challenge._id} />
-                      <button className="button ghost" type="submit">Tancar repte</button>
+                      <SubmitButton className="button ghost" pendingText="Tancant...">
+                        Tancar repte
+                      </SubmitButton>
                     </form>
                   </article>
                 ))}
@@ -391,9 +396,9 @@ export default async function TeacherPage() {
                     ))}
                   </div>
                 </div>
-                <button className="button" type="submit">
+                <SubmitButton className="button" pendingText="Creant grup...">
                   <Plus size={18} /> Crear grup
-                </button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -431,9 +436,9 @@ export default async function TeacherPage() {
                           })}
                         </div>
                       </div>
-                      <button className="button cyan" type="submit">
+                      <SubmitButton className="button cyan" pendingText="Desant...">
                         Desar canvis
-                      </button>
+                      </SubmitButton>
                     </form>
                     <form action={deleteClassAction} className="danger-zone inline-edit-form">
                       <input type="hidden" name="classId" value={group._id} />
@@ -441,9 +446,9 @@ export default async function TeacherPage() {
                         <strong>{group.name}</strong>
                         <div className="muted">Cursos actuals: {gradeLabel(group)}</div>
                       </div>
-                      <button className="button secondary" type="submit">
+                      <SubmitButton className="button secondary" pendingText="Eliminant...">
                         Eliminar grup
-                      </button>
+                      </SubmitButton>
                     </form>
                   </div>
                 ))}
@@ -485,9 +490,9 @@ export default async function TeacherPage() {
                     ))}
                   </select>
                 </div>
-                <button className="button cyan" type="submit">
+                <SubmitButton className="button cyan" pendingText="Afegint...">
                   <Plus size={18} /> Afegir
-                </button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -565,9 +570,9 @@ export default async function TeacherPage() {
                   <option value="hard">Difícil</option>
                 </select>
               </div>
-              <button className="button secondary" type="submit">
+              <SubmitButton className="button secondary" pendingText="Creant Jic...">
                 <Plus size={18} /> Crear Jic
-              </button>
+              </SubmitButton>
             </form>
           </section>
 
@@ -601,9 +606,9 @@ G_T=GAT
 PE_X=PEIX`}
                   />
                 </div>
-                <button className="button secondary" type="submit">
+                <SubmitButton className="button secondary" pendingText="Important...">
                   <Upload size={18} /> Importar i publicar
-                </button>
+                </SubmitButton>
               </form>
             </div>
           </section>
@@ -631,9 +636,9 @@ PE_X=PEIX`}
                   </Link>
                   <form action={deleteGameAction}>
                     <input type="hidden" name="gameId" value={game._id} />
-                    <button className="button secondary" type="submit">
+                    <SubmitButton className="button secondary" pendingText="Eliminant...">
                       Eliminar
-                    </button>
+                    </SubmitButton>
                   </form>
                 </article>
               ))}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { registerAction } from "@/lib/actions";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default function RegisterPage() {
   return (
@@ -30,9 +31,9 @@ export default function RegisterPage() {
                 <option value="student">Alumne</option>
               </select>
             </div>
-            <button className="button secondary" type="submit">
+            <SubmitButton pendingText="Creant compte..." className="button secondary">
               Crear compte segur
-            </button>
+            </SubmitButton>
           </form>
           <p className="muted">
             Ja tens compte? <Link href="/login">Inicia sessió</Link>

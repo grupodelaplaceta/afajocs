@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loginAction } from "@/lib/actions";
 import { BrandLogo } from "@/components/BrandLogo";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export default function LoginPage() {
   return (
@@ -19,9 +20,9 @@ export default function LoginPage() {
               <label htmlFor="password">Contrasenya</label>
               <input id="password" name="password" type="password" minLength={8} required />
             </div>
-            <button className="button" type="submit">
+            <SubmitButton pendingText="Entrant..." className="button">
               Inicia sessió
-            </button>
+            </SubmitButton>
           </form>
           <p className="muted">
             No tens compte? <Link href="/register">Crea un compte</Link>

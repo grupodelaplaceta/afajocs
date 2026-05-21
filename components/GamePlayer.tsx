@@ -6,6 +6,7 @@ import { saveAttemptAction } from "@/lib/actions";
 import { playUiSound, speakText, warmVoices } from "@/lib/client-audio";
 import { normalizeAnswer } from "@/lib/scoring";
 import { JicGuide } from "@/components/JicGuide";
+import { SubmitButton } from "@/components/SubmitButton";
 
 type StudentOption = {
   _id: string;
@@ -338,9 +339,9 @@ export function GamePlayer({
             <input type="hidden" name="totalItems" value={totalItems} />
             <input type="hidden" name="timeSpentSeconds" value={timeSpentSeconds} />
             <input type="hidden" name="timeLimitSeconds" value={game.estimatedTimeSeconds} />
-            <button className="button" type="submit">
+            <SubmitButton className="button" pendingText="Desant puntuació...">
               Desa la puntuació
-            </button>
+            </SubmitButton>
           </form>
         )}
       </div>
