@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Volume2 } from "lucide-react";
+import { speakText, warmVoices } from "@/lib/client-audio";
 
 type Props = {
   title?: string;
@@ -10,16 +12,12 @@ type Props = {
 };
 
 export function JicGuide({ title = "Soc en Jic", message, tone = "purple", compact = false }: Props) {
-  function speak() {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      return;
-    }
+  useEffect(() => {
+    warmVoices();
+  }, []);
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(`${title}. ${message}`);
-    utterance.lang = "ca-ES";
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
+  function speak() {
+    speakText(`${title}. ${message}`, "jic");
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy, Volume2 } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
+import { playUiSound, speakText, warmVoices } from "@/lib/client-audio";
 import { normalizeAnswer } from "@/lib/scoring";
 import { JicGuide } from "@/components/JicGuide";
 
@@ -76,21 +77,16 @@ export function GamePlayer({
     shouldUppercase
   );
 
-  function speak(text: string) {
-    if (typeof window === "undefined" || !("speechSynthesis" in window) || !text.trim()) {
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ca-ES";
-    utterance.rate = 0.88;
-    window.speechSynthesis.speak(utterance);
-  }
+  const speakStatement = (text: string) => speakText(text, "statement");
+  const speakWord = (text: string) => speakText(text, "word");
 
   function formatText(text: string) {
     return formatForGrade(text, shouldUppercase);
   }
+
+  useEffect(() => {
+    warmVoices();
+  }, []);
 
   useEffect(() => {
     if (!started || !startedAt || finished) {
@@ -119,6 +115,8 @@ export function GamePlayer({
     }
 
     if (countdown <= 0) {
+      playUiSound("start");
+      speakText(instructions, "statement");
       setCountdown(null);
       setStarted(true);
       setStartedAt(Date.now());
@@ -126,15 +124,17 @@ export function GamePlayer({
       return;
     }
 
+    playUiSound("countdown");
     const timeoutId = window.setTimeout(() => setCountdown((value) => (value ?? 1) - 1), 1000);
     return () => window.clearTimeout(timeoutId);
-  }, [countdown]);
+  }, [countdown, instructions]);
 
   function start() {
     setCountdown(3);
   }
 
   function finish(result: { correct: number; wrong: number }) {
+    playUiSound(result.wrong === 0 ? "complete" : "error");
     setCorrectAnswers(result.correct);
     setWrongAnswers(result.wrong);
     setFinished(true);
@@ -168,7 +168,7 @@ export function GamePlayer({
         <h1 style={{ color: "#101014", fontSize: "clamp(2rem, 5vw, 4rem)" }}>{game.title}</h1>
         <div className="instruction-row">
           <p className="muted">{instructions}</p>
-          <button className="button ghost compact-button" type="button" onClick={() => speak(instructions)}>
+          <button className="button ghost compact-button" type="button" onClick={() => speakStatement(instructions)}>
             <Volume2 size={18} /> Escoltar
           </button>
         </div>
@@ -269,7 +269,7 @@ export function GamePlayer({
         <p className="eyebrow">Missió</p>
         <div className="mission-title">
           <h2>{instructions}</h2>
-          <button className="button ghost compact-button" type="button" onClick={() => speak(instructions)}>
+          <button className="button ghost compact-button" type="button" onClick={() => speakStatement(instructions)}>
             <Volume2 size={18} /> Escoltar
           </button>
         </div>
@@ -277,16 +277,16 @@ export function GamePlayer({
 
         {!finished && game.type === "matching" && <MatchingActivity game={game} onFinish={finish} />}
         {!finished && game.type === "fill_blanks" && (
-          <FillBlanksActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+          <FillBlanksActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speakWord} />
         )}
         {!finished && game.type === "basic_typing" && (
-          <TypingActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+          <TypingActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speakStatement} />
         )}
         {!finished && game.type === "word_search" && (
-          <WordSearchActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+          <WordSearchActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speakWord} />
         )}
         {!finished && game.type === "letter_fill" && (
-          <LetterFillActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+          <LetterFillActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speakWord} />
         )}
 
         {finished && (
@@ -576,6 +576,7 @@ function WordSearchActivity({
       return;
     }
 
+    playUiSound("success");
     setFound((current) => [...current, match.id]);
     setFoundCells((current) => Array.from(new Set([...current, ...selected])));
     const timeoutId = window.setTimeout(() => setSelected([]), 180);
