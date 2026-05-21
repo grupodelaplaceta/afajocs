@@ -15,7 +15,7 @@ type StudentOption = {
 type GameData = {
   _id: string;
   title: string;
-  type: "matching" | "fill_blanks" | "basic_typing";
+  type: "matching" | "fill_blanks" | "basic_typing" | "word_search";
   content: Record<string, any>;
   estimatedTimeSeconds: number;
 };
@@ -142,15 +142,15 @@ export function GamePlayer({
             <div className="countdown-number">{countdown > 0 ? countdown : "¡Ya!"}</div>
           </div>
         )}
-        <p className="eyebrow">Preparacion</p>
+        <p className="eyebrow">Preparació</p>
         <h1 style={{ color: "#101014", fontSize: "clamp(2rem, 5vw, 4rem)" }}>{game.title}</h1>
         <p className="muted">{String(game.content.instructions || "Completa la actividad.")}</p>
 
         {mode === "classroom" && (
           <div className="field" style={{ margin: "18px 0" }}>
-            <label>¿Quien juega ahora?</label>
+            <label>Qui juga ara?</label>
             <select value={selectedStudentId} onChange={(event) => setSelectedStudentId(event.target.value)}>
-              <option value="">Seleccionar alumno</option>
+              <option value="">Selecciona alumne</option>
               {students.map((student) => (
                 <option key={student._id} value={student._id}>
                   {student.name} · {student.email}
@@ -164,14 +164,14 @@ export function GamePlayer({
           <article className="record-card featured">
             <Medal size={30} />
             <div>
-              <span className="eyebrow">Record personal</span>
-              <h2>{personalRecord ? `${personalRecord.bestScore} pts` : "Sin record"}</h2>
+              <span className="eyebrow">Rècord personal</span>
+              <h2>{personalRecord ? `${personalRecord.bestScore} pts` : "Sense rècord"}</h2>
               <p className="muted">
                 {personalRecord
                   ? `${activeStudent?.name || personalRecord.studentName} · ${personalRecord.bestTimeSeconds}s`
                   : selectedStudentId
-                    ? "Primera oportunidad para marcar record."
-                    : "Selecciona alumno para verlo."}
+                    ? "Primera oportunitat per marcar rècord."
+                    : "Selecciona un alumne per veure'l."}
               </p>
             </div>
           </article>
@@ -181,7 +181,7 @@ export function GamePlayer({
               <Trophy size={28} />
               <div>
                 <span className="eyebrow">{record.className}</span>
-                <h2>{record.bestScore ? `${record.bestScore} pts` : "Sin record"}</h2>
+                <h2>{record.bestScore ? `${record.bestScore} pts` : "Sense rècord"}</h2>
                 <p className="muted">
                   {record.studentName
                     ? `${record.studentName} · ${record.bestTimeSeconds}s`
@@ -194,14 +194,14 @@ export function GamePlayer({
 
         <div className="toolbar" style={{ justifyContent: "flex-start", marginTop: 18 }}>
           <button className="button ghost" type="button" onClick={goBack}>
-            <ArrowLeft size={18} /> Volver
+            <ArrowLeft size={18} /> Tornar
           </button>
           <button className="button black" type="button" onClick={toggleFullscreen}>
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            {isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+            {isFullscreen ? "Sortir de pantalla completa" : "Pantalla completa"}
           </button>
           <button className="button secondary" disabled={!selectedStudentId || countdown !== null} onClick={start}>
-            <Sparkles size={18} /> Empezar
+            <Sparkles size={18} /> Començar
           </button>
         </div>
       </div>
@@ -217,14 +217,14 @@ export function GamePlayer({
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <button className="button ghost compact-button" type="button" onClick={goBack}>
-            <ArrowLeft size={18} /> Volver
+            <ArrowLeft size={18} /> Tornar
           </button>
           <span className="badge orange">
             <Clock size={14} /> {timeSpentSeconds}s
           </span>
           <button className="button ghost compact-button" type="button" onClick={toggleFullscreen}>
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            {isFullscreen ? "Salir" : "Pantalla completa"}
+            {isFullscreen ? "Sortir" : "Pantalla completa"}
           </button>
           <div className="progress-track">
             <div className="progress-fill" />
@@ -233,19 +233,20 @@ export function GamePlayer({
       </header>
 
       <div className="game-board animate-in">
-        <p className="eyebrow">Mision</p>
+        <p className="eyebrow">Missió</p>
         <h2>{String(game.content.instructions || "Completa la actividad.")}</h2>
 
         {!finished && game.type === "matching" && <MatchingActivity game={game} onFinish={finish} />}
         {!finished && game.type === "fill_blanks" && <FillBlanksActivity game={game} onFinish={finish} />}
         {!finished && game.type === "basic_typing" && <TypingActivity game={game} onFinish={finish} />}
+        {!finished && game.type === "word_search" && <WordSearchActivity game={game} onFinish={finish} />}
 
         {finished && (
           <form action={saveAttemptAction} className="panel result-panel" style={{ marginTop: 18 }}>
             <Trophy color="#f05800" size={42} />
-            <h2>Resultado listo</h2>
+            <h2>Resultat a punt</h2>
             <p className="muted">
-              Aciertos: {correctAnswers}/{totalItems}. Tiempo: {timeSpentSeconds}s.
+              Encerts: {correctAnswers}/{totalItems}. Temps: {timeSpentSeconds}s.
             </p>
             <input type="hidden" name="gameId" value={game._id} />
             <input type="hidden" name="studentId" value={selectedStudentId} />
@@ -256,7 +257,7 @@ export function GamePlayer({
             <input type="hidden" name="timeSpentSeconds" value={timeSpentSeconds} />
             <input type="hidden" name="timeLimitSeconds" value={game.estimatedTimeSeconds} />
             <button className="button" type="submit">
-              Guardar puntuacion
+              Desa la puntuació
             </button>
           </form>
         )}
@@ -268,6 +269,7 @@ export function GamePlayer({
 function getTotalItems(game: GameData) {
   if (game.type === "matching") return game.content.pairs?.length || 1;
   if (game.type === "fill_blanks") return game.content.blanks?.length || 1;
+  if (game.type === "word_search") return game.content.words?.length || 1;
   return game.content.prompts?.length || 1;
 }
 
@@ -301,7 +303,7 @@ function MatchingActivity({
               value={answers[pair.id] || ""}
               onChange={(event) => setAnswers({ ...answers, [pair.id]: event.target.value })}
             >
-              <option value="">Elige pareja</option>
+              <option value="">Tria parella</option>
               {rights.map((right: any) => (
                 <option key={right.id} value={right.right.value}>
                   {right.right.value}
@@ -312,7 +314,7 @@ function MatchingActivity({
         ))}
       </div>
       <button className="button" style={{ marginTop: 18 }} onClick={check}>
-        <Check size={18} /> Comprobar
+        <Check size={18} /> Comprova
       </button>
     </div>
   );
@@ -368,7 +370,7 @@ function FillBlanksActivity({
         ))}
       </div>
       <button className="button" style={{ marginTop: 18 }} onClick={check}>
-        <Check size={18} /> Comprobar
+        <Check size={18} /> Comprova
       </button>
     </div>
   );
@@ -405,14 +407,96 @@ function TypingActivity({
             <input
               value={answers[prompt.id] || ""}
               onChange={(event) => setAnswers({ ...answers, [prompt.id]: event.target.value })}
-              placeholder="Tu respuesta"
+              placeholder="La teva resposta"
             />
           </label>
         </div>
       ))}
       <button className="button" onClick={check}>
-        <Check size={18} /> Comprobar
+        <Check size={18} /> Comprova
       </button>
+    </div>
+  );
+}
+
+function WordSearchActivity({
+  game,
+  onFinish
+}: {
+  game: GameData;
+  onFinish: (result: { correct: number; wrong: number }) => void;
+}) {
+  const grid: string[] = game.content.grid || [];
+  const words: Array<{ id: string; word: string }> = game.content.words || [];
+  const [selected, setSelected] = useState<string[]>([]);
+  const [found, setFound] = useState<string[]>([]);
+
+  const selectedWord = selected
+    .map((key) => {
+      const [row, col] = key.split("-").map(Number);
+      return grid[row]?.[col] || "";
+    })
+    .join("");
+
+  function toggleCell(row: number, col: number) {
+    const key = `${row}-${col}`;
+    setSelected((current) =>
+      current.includes(key) ? current.filter((item) => item !== key) : [...current, key]
+    );
+  }
+
+  function markWord() {
+    const normalized = normalizeAnswer(selectedWord);
+    const match = words.find(
+      (item) => !found.includes(item.id) && normalizeAnswer(item.word) === normalized
+    );
+    if (match) {
+      setFound([...found, match.id]);
+      setSelected([]);
+    }
+  }
+
+  return (
+    <div className="word-search-wrap">
+      <div className="word-search-grid" style={{ gridTemplateColumns: `repeat(${grid[0]?.length || 1}, 1fr)` }}>
+        {grid.map((row, rowIndex) =>
+          row.split("").map((letter, colIndex) => {
+            const key = `${rowIndex}-${colIndex}`;
+            return (
+              <button
+                className={`letter-cell ${selected.includes(key) ? "selected" : ""}`}
+                key={key}
+                type="button"
+                onClick={() => toggleCell(rowIndex, colIndex)}
+              >
+                {letter}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      <aside className="word-list">
+        <h3>Paraules</h3>
+        {words.map((item) => (
+          <span className={`word-chip ${found.includes(item.id) ? "found" : ""}`} key={item.id}>
+            {item.word}
+          </span>
+        ))}
+      </aside>
+
+      <div className="toolbar" style={{ justifyContent: "flex-start" }}>
+        <button className="button cyan" type="button" onClick={markWord} disabled={!selected.length}>
+          Marcar paraula: {selectedWord || "..."}
+        </button>
+        <button
+          className="button"
+          type="button"
+          onClick={() => onFinish({ correct: found.length, wrong: words.length - found.length })}
+        >
+          <Check size={18} /> Finalitzar
+        </button>
+      </div>
     </div>
   );
 }

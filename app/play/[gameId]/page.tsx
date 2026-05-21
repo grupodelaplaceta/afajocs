@@ -17,7 +17,7 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
 
   const game = await Game.findById(gameId).lean();
   if (!game) {
-    return <main className="page">Juego no encontrado.</main>;
+    return <main className="page">Joc no trobat.</main>;
   }
 
   let students: any[] = [];
@@ -49,7 +49,7 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
     <main className="page game-page">
       <div className="shell">
         <Link className="button ghost" href={backHref}>
-          <ArrowLeft size={18} /> Volver
+          <ArrowLeft size={18} /> Tornar
         </Link>
         <div style={{ marginTop: 18 }}>
           <GamePlayer

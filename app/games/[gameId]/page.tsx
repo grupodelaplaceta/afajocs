@@ -12,13 +12,15 @@ function asPlain(value: unknown): any {
 
 function typeLabel(type: string) {
   if (type === "matching") return "Relacionar";
-  if (type === "fill_blanks") return "Llenar huecos";
-  return "Escribir";
+  if (type === "fill_blanks") return "Omplir buits";
+  if (type === "word_search") return "Sopa de lletres";
+  return "Escriure";
 }
 
 function itemCount(game: any) {
   if (game.type === "matching") return game.content?.pairs?.length || 0;
   if (game.type === "fill_blanks") return game.content?.blanks?.length || 0;
+  if (game.type === "word_search") return game.content?.words?.length || 0;
   return game.content?.prompts?.length || 0;
 }
 
@@ -29,7 +31,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
 
   const game = await Game.findById(gameId).lean();
   if (!game) {
-    return <main className="page">Juego no encontrado.</main>;
+    return <main className="page">Joc no trobat.</main>;
   }
 
   let teacherId: unknown = undefined;
@@ -55,8 +57,8 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
       <div className="shell">
         <header className="topbar">
           <div>
-            <BrandLogo label="Detalle de actividad" />
-            <p className="muted">Consulta records antes de jugar.</p>
+            <BrandLogo label="Detall de l'activitat" />
+            <p className="muted">Consulta rècords abans de jugar.</p>
           </div>
           <div className="toolbar">
             <Link className="button ghost" href="/games">
@@ -89,16 +91,16 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
           <article className="record-card featured">
             <Trophy size={34} />
             <div>
-              <span className="eyebrow">Record global</span>
+              <span className="eyebrow">Rècord global</span>
               <h2>
                 {data.recordViews.globalRecord
                   ? `${data.recordViews.globalRecord.bestScore} pts`
-                  : "Sin record"}
+                  : "Sense rècord"}
               </h2>
               <p className="muted">
                 {data.recordViews.globalRecord
                   ? `${data.recordViews.globalRecord.studentName} · ${data.recordViews.globalRecord.bestTimeSeconds}s`
-                  : "Aun nadie ha jugado esta actividad."}
+                  : "Encara ningú ha jugat aquesta activitat."}
               </p>
             </div>
           </article>
@@ -106,30 +108,30 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
           <article className="record-card">
             <Medal size={32} />
             <div>
-              <span className="eyebrow">Tu record</span>
+              <span className="eyebrow">El teu rècord</span>
               <h2>
                 {data.recordViews.personalRecord
                   ? `${data.recordViews.personalRecord.bestScore} pts`
-                  : "Sin record"}
+                  : "Sense rècord"}
               </h2>
               <p className="muted">
                 {data.recordViews.personalRecord
                   ? `${data.recordViews.personalRecord.bestTimeSeconds}s`
-                  : "Juega para crear tu marca."}
+                  : "Juga per crear la teva marca."}
               </p>
             </div>
           </article>
         </section>
 
         <section className="panel" style={{ marginTop: 18 }}>
-          <h2>Records por clase</h2>
+          <h2>Rècords per grup</h2>
           <div className="game-card-grid" style={{ marginTop: 18 }}>
             {data.recordViews.classRecords.map((record: any) => (
               <article className="record-card" key={record.classId}>
                 <Trophy size={30} />
                 <div>
                   <span className="eyebrow">{record.className}</span>
-                  <h2>{record.bestScore ? `${record.bestScore} pts` : "Sin record"}</h2>
+                  <h2>{record.bestScore ? `${record.bestScore} pts` : "Sense rècord"}</h2>
                   <p className="muted">
                     {record.studentName
                       ? `${record.studentName} · ${record.bestTimeSeconds}s`
@@ -139,7 +141,7 @@ export default async function GameDetailPage({ params }: { params: Promise<{ gam
               </article>
             ))}
             {data.recordViews.classRecords.length === 0 && (
-              <p className="muted">No hay clases vinculadas para mostrar records.</p>
+              <p className="muted">No hi ha grups vinculats per mostrar rècords.</p>
             )}
           </div>
         </section>

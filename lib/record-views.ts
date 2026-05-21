@@ -12,7 +12,7 @@ export async function getGameRecordViews(gameId: string, teacherId?: unknown, st
 
   const plainRecords = records.map((record: any) => ({
     studentId: record.studentId?._id?.toString() || record.studentId?.toString(),
-    studentName: record.studentId?.name || "Alumno",
+    studentName: record.studentId?.name || "Alumne",
     studentEmail: record.studentId?.email || "",
     bestScore: record.bestScore,
     bestTimeSeconds: record.bestTimeSeconds,
@@ -44,4 +44,3 @@ export async function getGameRecordViews(gameId: string, teacherId?: unknown, st
     globalRecord: plainRecords[0] || null
   };
 }
-

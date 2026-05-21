@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const gameTypes = ["matching", "fill_blanks", "basic_typing"] as const;
+const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search"] as const;
 const difficulties = ["easy", "medium", "hard"] as const;
 
 export const aiGamePrompt = `Actua como diseñador de actividades educativas para primaria.
@@ -8,7 +8,7 @@ Crea UNA actividad para AFAJICS en JSON valido, sin markdown, sin comentarios y 
 
 Reglas:
 - Publico: alumnos de primaria.
-- Tipos permitidos: matching, fill_blanks, basic_typing.
+- Tipos permitidos: matching, fill_blanks, basic_typing, word_search.
 - Usa instrucciones cortas, claras y adecuadas para niños.
 - Devuelve solo JSON valido.
 
@@ -16,7 +16,7 @@ Formato obligatorio:
 {
   "title": "Titulo del juego",
   "subject": "Asignatura",
-  "type": "matching | fill_blanks | basic_typing",
+  "type": "matching | fill_blanks | basic_typing | word_search",
   "gradeMin": 1,
   "gradeMax": 6,
   "difficulty": "easy | medium | hard",
@@ -50,6 +50,17 @@ Si type es "basic_typing", content debe ser:
   "settings": { "timeLimitSeconds": 60, "caseSensitive": false, "accentSensitive": false, "trimWhitespace": true },
   "prompts": [
     { "id": "prompt-1", "question": "Cuanto es 7 + 5?", "acceptedAnswers": ["12", "doce"] }
+  ]
+}
+
+Si type es "word_search", content debe ser:
+{
+  "instructions": "Troba les paraules amagades.",
+  "settings": { "timeLimitSeconds": 120 },
+  "grid": ["GATXX", "AOPXX", "TSEIX", "XXDOF", "XXIXX"],
+  "words": [
+    { "id": "word-1", "word": "GAT" },
+    { "id": "word-2", "word": "PEIX" }
   ]
 }`;
 
@@ -93,7 +104,7 @@ function parseStructuredText(raw: string) {
     if (fieldMatch) {
       const key = normalizeKey(fieldMatch[1]);
       const value = fieldMatch[2].trim();
-      if (["pares", "preguntas", "respuestas", "banco"].includes(key)) {
+      if (["pares", "preguntas", "respuestas", "banco", "graella", "palabras", "paraules"].includes(key)) {
         currentSection = key;
         sections.set(currentSection, value ? [value] : []);
       } else {
@@ -170,6 +181,28 @@ function parseStructuredText(raw: string) {
     };
   }
 
+  if (type === "word_search") {
+    const grid = (sections.get("graella") || [])
+      .map((line) => line.replace(/\s+/g, "").toUpperCase())
+      .filter(Boolean);
+    const words = (sections.get("paraules") || sections.get("palabras") || [])
+      .join(",")
+      .split(",")
+      .map((word, index) => word.trim().toUpperCase())
+      .filter(Boolean)
+      .map((word, index) => ({ id: `word-${index + 1}`, word }));
+
+    return {
+      ...base,
+      content: {
+        instructions: fields.get("instrucciones") || "Troba les paraules amagades.",
+        settings: { timeLimitSeconds: base.estimatedTimeSeconds },
+        grid,
+        words
+      }
+    };
+  }
+
   const prompts = (sections.get("preguntas") || []).map((line, index) => {
     const [question, answers] = line.split(/\s*=\s*/);
     return {
@@ -220,6 +253,14 @@ function validateContent(game: ImportedGame) {
       throw new Error("Un juego de escritura necesita al menos una pregunta.");
     }
   }
+
+  if (game.type === "word_search") {
+    const grid = game.content.grid;
+    const words = game.content.words;
+    if (!Array.isArray(grid) || grid.length < 3 || !Array.isArray(words) || words.length < 1) {
+      throw new Error("Una sopa de lletres necessita una graella i paraules.");
+    }
+  }
 }
 
 function normalizeKey(value: string) {
@@ -235,6 +276,7 @@ function normalizeType(value: string) {
   const normalized = normalizeKey(value);
   if (["huecos", "fill_blanks", "llenar_huecos"].includes(normalized)) return "fill_blanks";
   if (["escribir", "basic_typing", "escritura"].includes(normalized)) return "basic_typing";
+  if (["sopa", "sopa_de_lletres", "sopa_de_letras", "word_search"].includes(normalized)) return "word_search";
   return "matching";
 }
 
@@ -252,4 +294,3 @@ function parseGradeRange(value: string) {
     gradeMax: numbers[1] || numbers[0] || 6
   };
 }
-

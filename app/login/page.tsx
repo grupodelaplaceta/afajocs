@@ -12,19 +12,19 @@ export default function LoginPage() {
           </div>
           <form className="form" action={loginAction}>
             <div className="field">
-              <label htmlFor="email">Correo</label>
+              <label htmlFor="email">Correu</label>
               <input id="email" name="email" type="email" required />
             </div>
             <div className="field">
-              <label htmlFor="password">Contraseña</label>
+              <label htmlFor="password">Contrasenya</label>
               <input id="password" name="password" type="password" minLength={8} required />
             </div>
             <button className="button" type="submit">
-              Iniciar sesion
+              Inicia sessió
             </button>
           </form>
           <p className="muted">
-            ¿No tienes cuenta? <Link href="/register">Crear cuenta</Link>
+            No tens compte? <Link href="/register">Crea un compte</Link>
           </p>
         </div>
       </div>

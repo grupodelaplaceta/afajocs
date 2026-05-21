@@ -12,8 +12,9 @@ function asPlain(value: unknown): any {
 
 function typeLabel(type: string) {
   if (type === "matching") return "Relacionar";
-  if (type === "fill_blanks") return "Llenar huecos";
-  return "Escribir";
+  if (type === "fill_blanks") return "Omplir buits";
+  if (type === "word_search") return "Sopa de lletres";
+  return "Escriure";
 }
 
 export default async function GamesPage() {
@@ -41,9 +42,9 @@ export default async function GamesPage() {
       <div className="shell">
         <header className="topbar">
           <div>
-            <BrandLogo label="Biblioteca de juegos" />
+            <BrandLogo label="Biblioteca de jocs" />
             <p className="muted">
-              Todos los juegos publicados, listos para aula, tablet o casa.
+              Tots els jocs publicats, preparats per a l'aula, la tauleta o casa.
             </p>
           </div>
           <div className="toolbar">
@@ -51,7 +52,7 @@ export default async function GamesPage() {
               className="button ghost"
               href={session?.role === "teacher" ? "/teacher" : session?.role === "student" ? "/student" : "/"}
             >
-              <ArrowLeft size={18} /> Volver
+              <ArrowLeft size={18} /> Tornar
             </Link>
             {session ? (
               <form action={logoutAction}>
@@ -68,10 +69,10 @@ export default async function GamesPage() {
         </header>
 
         <section className="hero library-hero">
-          <p className="eyebrow">Juegos publicados</p>
-          <h1>Elige una actividad y empieza a jugar.</h1>
+          <p className="eyebrow">Jocs publicats</p>
+          <h1>Tria una activitat i comença a jugar.</h1>
           <p className="muted">
-            Tarjetas grandes, filtros visuales por curso y acceso directo a cada juego.
+            Targetes grans, filtres visuals per curs i accés directe a cada joc.
           </p>
         </section>
 
@@ -88,7 +89,7 @@ export default async function GamesPage() {
               </p>
               <div className="toolbar" style={{ justifyContent: "stretch" }}>
                 <Link className="button ghost" href={`/games/${game._id}`}>
-                  Detalle
+                  Detall
                 </Link>
                 <Link className="button secondary" href={`/play/${game._id}`}>
                   <BookOpen size={18} /> Jugar
@@ -98,8 +99,8 @@ export default async function GamesPage() {
           ))}
           {games.length === 0 && (
             <div className="panel">
-              <h2>No hay juegos publicados todavia</h2>
-              <p className="muted">Cuando un profesor publique juegos, apareceran aqui.</p>
+              <h2>Encara no hi ha jocs publicats</h2>
+              <p className="muted">Quan un professor publiqui jocs, apareixeran aquí.</p>
             </div>
           )}
         </section>

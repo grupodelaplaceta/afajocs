@@ -8,6 +8,7 @@
   --line: rgba(16, 16, 20, 0.12);
   --shadow: 0 10px 28px rgba(16, 16, 20, 0.1);
   --touch-target: 56px;
+  --radius: 18px;
 }
 
 * {
@@ -757,6 +758,103 @@ p {
   animation: fadeLift 360ms ease both, brandPulse 1600ms ease-in-out infinite;
 }
 
+.panel,
+.card,
+.hero,
+.button,
+.field input,
+.field select,
+.field textarea,
+.prompt-box textarea,
+.brand-mark,
+.game-board,
+.game-card,
+.game-card-icon,
+.record-card,
+.record-card svg,
+.tabs,
+.tab,
+.choice,
+.row,
+.tile,
+.blank,
+.countdown-layer,
+.inline-edit-form {
+  border-radius: var(--radius);
+}
+
+.word-search-wrap {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  margin-top: 18px;
+}
+
+.word-search-grid {
+  display: grid;
+  gap: 8px;
+  max-width: min(100%, 720px);
+}
+
+.letter-cell {
+  align-items: center;
+  aspect-ratio: 1;
+  background: var(--brand-white);
+  border: 3px solid var(--brand-purple);
+  border-radius: 14px;
+  color: var(--brand-black);
+  cursor: pointer;
+  display: grid;
+  font-size: clamp(1.1rem, 3vw, 2rem);
+  font-weight: 900;
+  min-height: 48px;
+  place-items: center;
+  transition: transform 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.letter-cell:nth-child(2n) {
+  border-color: var(--brand-cyan);
+}
+
+.letter-cell:nth-child(3n) {
+  border-color: var(--brand-orange);
+}
+
+.letter-cell.selected {
+  background: var(--brand-black);
+  border-color: var(--brand-cyan);
+  color: var(--brand-white);
+  transform: scale(0.96);
+}
+
+.word-list {
+  align-content: flex-start;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 18px;
+}
+
+.word-list h3 {
+  flex-basis: 100%;
+}
+
+.word-chip {
+  background: var(--brand-black);
+  border-radius: 999px;
+  color: var(--brand-white);
+  font-weight: 900;
+  padding: 10px 14px;
+}
+
+.word-chip.found {
+  background: var(--brand-cyan);
+  text-decoration: line-through;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -805,6 +903,10 @@ p {
 
   .choice-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .word-search-wrap {
+    grid-template-columns: 1fr;
   }
 }
 

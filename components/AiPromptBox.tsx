@@ -16,16 +16,15 @@ export function AiPromptBox({ prompt }: { prompt: string }) {
     <div className="prompt-box">
       <div className="row" style={{ border: 0, padding: 0, marginBottom: 10 }}>
         <div>
-          <h2>Prompt para IA</h2>
-          <p className="muted">Copialo, pide el juego y pega la respuesta abajo.</p>
+          <h2>Prompt per a IA</h2>
+          <p className="muted">Copia'l, demana el joc i enganxa la resposta a sota.</p>
         </div>
         <button className="button black" type="button" onClick={copyPrompt}>
           {copied ? <Check size={18} /> : <Clipboard size={18} />}
           {copied ? "Copiado" : "Copiar prompt"}
         </button>
       </div>
-      <textarea readOnly value={prompt} aria-label="Prompt para generar juegos con IA" />
+      <textarea readOnly value={prompt} aria-label="Prompt per generar jocs amb IA" />
     </div>
   );
 }
-

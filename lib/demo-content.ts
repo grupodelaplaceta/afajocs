@@ -50,6 +50,23 @@ export const demoGameContent = {
         acceptedAnswers: ["cat"]
       }
     ]
+  },
+  word_search: {
+    instructions: "Troba les paraules amagades a la sopa de lletres.",
+    settings: { timeLimitSeconds: 120 },
+    grid: [
+      "GATXPM",
+      "AQOSES",
+      "TBRLRO",
+      "AOVLAC",
+      "RSDOFI",
+      "PEIXNU"
+    ],
+    words: [
+      { id: "word-1", word: "GAT" },
+      { id: "word-2", word: "OS" },
+      { id: "word-3", word: "PEIX" },
+      { id: "word-4", word: "DOFI" }
+    ]
   }
 };
-

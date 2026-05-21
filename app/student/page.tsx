@@ -22,7 +22,7 @@ export default async function StudentPage() {
           <div className="panel">
             <h1>Perfil pendiente</h1>
             <p className="muted">
-              Tu cuenta existe, pero ningun profesor ha registrado todavia este correo como alumno.
+              El teu compte existeix, però cap professor ha registrat encara aquest correu com a alumne.
             </p>
             <form action={logoutAction}>
               <button className="button" type="submit">Salir</button>
@@ -46,14 +46,16 @@ export default async function StudentPage() {
   ]);
 
   const data = asPlain({ games, attempts, records });
+  const totalScore = data.attempts.reduce((sum: number, attempt: { score?: number }) => sum + (attempt.score || 0), 0);
+  const bestScore = data.attempts.reduce((best: number, attempt: { score?: number }) => Math.max(best, attempt.score || 0), 0);
 
   return (
     <main className="page">
       <div className="shell">
         <header className="topbar">
           <div>
-            <BrandLogo label="Panel alumno" />
-            <p className="muted">Hola, {student.name}. Tus juegos y records viven aqui.</p>
+            <BrandLogo label="Panell alumne" />
+            <p className="muted">Hola, {student.name}. Els teus jocs i rècords viuen aquí.</p>
           </div>
           <form action={logoutAction}>
             <div className="toolbar">
@@ -70,21 +72,25 @@ export default async function StudentPage() {
         <section className="grid grid-3">
           <article className="card stat">
             <h2>{data.games.length}</h2>
-            <p className="muted">Juegos disponibles</p>
+            <p className="muted">Jocs disponibles</p>
           </article>
           <article className="card stat cyan">
             <h2>{data.attempts.length}</h2>
-            <p className="muted">Partidas jugadas</p>
+            <p className="muted">Partides jugades</p>
           </article>
           <article className="card stat orange">
-            <h2>{data.records.length}</h2>
-            <p className="muted">Records personales</p>
+            <h2>{totalScore}</h2>
+            <p className="muted">Punts totals</p>
+          </article>
+          <article className="card stat">
+            <h2>{bestScore}</h2>
+            <p className="muted">Millor puntuació</p>
           </article>
         </section>
 
         <section className="grid grid-2" style={{ marginTop: 18 }}>
           <div className="panel">
-            <h2>Juegos</h2>
+            <h2>Jocs</h2>
             <div className="list" style={{ marginTop: 14 }}>
               {data.games.map((game: { _id: string; title: string; subject: string; type: string }) => (
                 <div className="row" key={game._id}>
@@ -101,12 +107,12 @@ export default async function StudentPage() {
           </div>
 
           <div className="panel">
-            <h2>Records</h2>
+            <h2>Rècords</h2>
             <div className="list" style={{ marginTop: 14 }}>
               {data.records.map((record: { _id: string; bestScore: number; bestTimeSeconds: number; gameId?: { title?: string } }) => (
                 <div className="row" key={record._id}>
                   <div>
-                    <strong>{record.gameId?.title || "Juego"}</strong>
+                    <strong>{record.gameId?.title || "Joc"}</strong>
                     <div className="muted">{record.bestTimeSeconds}s</div>
                   </div>
                   <span className="badge cyan">
@@ -114,7 +120,7 @@ export default async function StudentPage() {
                   </span>
                 </div>
               ))}
-              {data.records.length === 0 && <p className="muted">Juega una partida para estrenar records.</p>}
+              {data.records.length === 0 && <p className="muted">Juga una partida per estrenar rècords.</p>}
             </div>
           </div>
         </section>

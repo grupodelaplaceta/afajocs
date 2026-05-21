@@ -19,13 +19,13 @@ export default async function HomePage() {
             ) : (
               <>
                 <Link className="button ghost" href="/login">
-                  Iniciar sesion
+                  Inicia sessió
                 </Link>
                 <Link className="button secondary" href="/games">
-                  Juegos
+                  Jocs
                 </Link>
                 <Link className="button" href="/register">
-                  Crear cuenta
+                  Crear compte
                 </Link>
               </>
             )}
@@ -33,32 +33,32 @@ export default async function HomePage() {
         </header>
 
         <section className="hero">
-          <p className="eyebrow">JClic por dentro, energia Kahoot por fuera</p>
-          <h1>Actividades educativas con record personal para primaria.</h1>
+          <p className="eyebrow">JClic per dins, energia Kahoot per fora</p>
+          <h1>Activitats educatives amb rècord personal per a primària.</h1>
           <p className="muted" style={{ maxWidth: 680 }}>
-            Profesores crean clases, alumnos juegan en aula o desde casa, y cada partida
-            guarda aciertos, tiempo, puntuacion y records con la paleta AFA.
+            El professorat crea grups, l'alumnat juga a l'aula o des de casa, i cada partida
+            desa encerts, temps, puntuació i rècords amb la paleta AFA.
           </p>
           <Link className="button secondary" href={session ? "/teacher" : "/register"}>
-            Empezar <ArrowRight size={18} />
+            Començar <ArrowRight size={18} />
           </Link>
         </section>
 
         <section className="grid grid-3" style={{ marginTop: 18 }}>
           <article className="card stat">
             <GraduationCap color="#c000d8" />
-            <h3>Panel docente</h3>
-            <p className="muted">Clases, alumnos, juegos y seguimiento de resultados.</p>
+            <h3>Panell docent</h3>
+            <p className="muted">Grups, alumnes, jocs i seguiment de resultats.</p>
           </article>
           <article className="card stat cyan">
             <Gamepad2 color="#18a0e8" />
-            <h3>Modo aula</h3>
-            <p className="muted">Seleccion rapida de alumno antes de jugar, sin login infantil.</p>
+            <h3>Mode aula</h3>
+            <p className="muted">Selecció ràpida d'alumne abans de jugar, sense login infantil.</p>
           </article>
           <article className="card stat orange">
             <Trophy color="#f05800" />
-            <h3>Records</h3>
-            <p className="muted">Motivacion individual basada en mejora personal.</p>
+            <h3>Rècords</h3>
+            <p className="muted">Motivació individual basada en la millora personal.</p>
           </article>
         </section>
       </div>
