@@ -818,6 +818,66 @@ p {
   gap: 10px;
 }
 
+.instruction-row,
+.mission-title,
+.prompt-line,
+.letter-fill-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.instruction-row p {
+  margin: 0;
+}
+
+.mission-title {
+  align-items: flex-start;
+}
+
+.prompt-line {
+  align-items: flex-start;
+}
+
+.prompt-line > span {
+  flex: 1;
+}
+
+.letter-fill-list {
+  display: grid;
+  gap: clamp(14px, 2vw, 20px);
+  margin-top: 18px;
+}
+
+.letter-fill-card {
+  cursor: default;
+}
+
+.letter-pattern {
+  color: var(--brand-purple);
+  font-size: clamp(2.2rem, 7vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  margin: 8px 0 14px;
+  overflow-wrap: anywhere;
+}
+
+.word-chip-button {
+  align-items: center;
+  background: var(--brand-orange);
+  border: 0;
+  border-radius: 999px;
+  color: var(--brand-white);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px 14px;
+}
+
 .record-screen {
   align-items: center;
   background: var(--brand-black);
@@ -924,10 +984,15 @@ p {
 }
 
 .word-chip {
+  align-items: center;
   background: var(--brand-black);
+  border: 0;
   border-radius: 999px;
   color: var(--brand-white);
+  cursor: pointer;
+  display: inline-flex;
   font-weight: 900;
+  gap: 6px;
   padding: 10px 14px;
 }
 
@@ -998,6 +1063,14 @@ p {
 
   .word-search-wrap {
     grid-template-columns: 1fr;
+  }
+
+  .instruction-row,
+  .mission-title,
+  .prompt-line,
+  .letter-fill-head {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

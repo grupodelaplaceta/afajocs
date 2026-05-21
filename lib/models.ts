@@ -47,7 +47,7 @@ const gameSchema = new Schema(
     teacherId: { type: Schema.Types.ObjectId, ref: "Teacher", required: true },
     title: { type: String, required: true, trim: true },
     description: { type: String, default: "" },
-    type: { type: String, required: true, enum: ["matching", "fill_blanks", "basic_typing", "word_search"] },
+    type: { type: String, required: true, enum: ["matching", "fill_blanks", "basic_typing", "word_search", "letter_fill"] },
     subject: { type: String, required: true, trim: true },
     gradeMin: { type: Number, min: 1, max: 6, required: true },
     gradeMax: { type: Number, min: 1, max: 6, required: true },

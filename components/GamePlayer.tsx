@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy } from "lucide-react";
+import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy, Volume2 } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { normalizeAnswer } from "@/lib/scoring";
 
@@ -15,7 +15,7 @@ type StudentOption = {
 type GameData = {
   _id: string;
   title: string;
-  type: "matching" | "fill_blanks" | "basic_typing" | "word_search";
+  type: "matching" | "fill_blanks" | "basic_typing" | "word_search" | "letter_fill";
   content: Record<string, any>;
   estimatedTimeSeconds: number;
 };
@@ -69,6 +69,27 @@ export function GamePlayer({
   const timeSpentSeconds = started ? elapsedSeconds : 1;
   const personalRecord = records.find((record) => record.studentId === selectedStudentId);
   const activeStudent = students.find((student) => student._id === selectedStudentId);
+  const shouldUppercase = Boolean(activeStudent && activeStudent.gradeLevel <= 2);
+  const instructions = formatForGrade(
+    String(game.content.instructions || "Completa l'activitat."),
+    shouldUppercase
+  );
+
+  function speak(text: string) {
+    if (typeof window === "undefined" || !("speechSynthesis" in window) || !text.trim()) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ca-ES";
+    utterance.rate = 0.88;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function formatText(text: string) {
+    return formatForGrade(text, shouldUppercase);
+  }
 
   useEffect(() => {
     if (!started || !startedAt || finished) {
@@ -144,7 +165,12 @@ export function GamePlayer({
         )}
         <p className="eyebrow">Preparació</p>
         <h1 style={{ color: "#101014", fontSize: "clamp(2rem, 5vw, 4rem)" }}>{game.title}</h1>
-        <p className="muted">{String(game.content.instructions || "Completa la actividad.")}</p>
+        <div className="instruction-row">
+          <p className="muted">{instructions}</p>
+          <button className="button ghost compact-button" type="button" onClick={() => speak(instructions)}>
+            <Volume2 size={18} /> Escoltar
+          </button>
+        </div>
 
         {mode === "classroom" && (
           <div className="field" style={{ margin: "18px 0" }}>
@@ -234,12 +260,26 @@ export function GamePlayer({
 
       <div className="game-board animate-in">
         <p className="eyebrow">Missió</p>
-        <h2>{String(game.content.instructions || "Completa la actividad.")}</h2>
+        <div className="mission-title">
+          <h2>{instructions}</h2>
+          <button className="button ghost compact-button" type="button" onClick={() => speak(instructions)}>
+            <Volume2 size={18} /> Escoltar
+          </button>
+        </div>
 
         {!finished && game.type === "matching" && <MatchingActivity game={game} onFinish={finish} />}
-        {!finished && game.type === "fill_blanks" && <FillBlanksActivity game={game} onFinish={finish} />}
-        {!finished && game.type === "basic_typing" && <TypingActivity game={game} onFinish={finish} />}
-        {!finished && game.type === "word_search" && <WordSearchActivity game={game} onFinish={finish} />}
+        {!finished && game.type === "fill_blanks" && (
+          <FillBlanksActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+        )}
+        {!finished && game.type === "basic_typing" && (
+          <TypingActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+        )}
+        {!finished && game.type === "word_search" && (
+          <WordSearchActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+        )}
+        {!finished && game.type === "letter_fill" && (
+          <LetterFillActivity game={game} onFinish={finish} formatText={formatText} onSpeak={speak} />
+        )}
 
         {finished && (
           <form action={saveAttemptAction} className="panel result-panel" style={{ marginTop: 18 }}>
@@ -271,6 +311,10 @@ function getTotalItems(game: GameData) {
   if (game.type === "fill_blanks") return game.content.blanks?.length || 1;
   if (game.type === "word_search") return game.content.words?.length || 1;
   return game.content.prompts?.length || 1;
+}
+
+function formatForGrade(text: string, shouldUppercase: boolean) {
+  return shouldUppercase ? text.toUpperCase() : text;
 }
 
 function MatchingActivity({
@@ -322,10 +366,14 @@ function MatchingActivity({
 
 function FillBlanksActivity({
   game,
-  onFinish
+  onFinish,
+  formatText,
+  onSpeak
 }: {
   game: GameData;
   onFinish: (result: { correct: number; wrong: number }) => void;
+  formatText: (text: string) => string;
+  onSpeak: (text: string) => void;
 }) {
   const blanks = game.content.blanks || [];
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -343,7 +391,7 @@ function FillBlanksActivity({
       <p style={{ fontSize: "1.4rem" }}>
         {(game.content.text || "").split(/({{blank:\d+}})/g).map((part: string, index: number) => {
           const match = part.match(/{{blank:(\d+)}}/);
-          if (!match) return <span key={index}>{part}</span>;
+          if (!match) return <span key={index}>{formatText(part)}</span>;
           const blank = blanks[Number(match[1]) - 1];
           return (
             <select
@@ -364,9 +412,9 @@ function FillBlanksActivity({
       </p>
       <div className="word-bank">
         {(game.content.wordBank || []).map((word: string) => (
-          <span className="badge orange" key={word}>
-            {word}
-          </span>
+          <button className="word-chip-button" key={word} type="button" onClick={() => onSpeak(word)}>
+            <Volume2 size={14} /> {formatText(word)}
+          </button>
         ))}
       </div>
       <button className="button" style={{ marginTop: 18 }} onClick={check}>
@@ -378,10 +426,14 @@ function FillBlanksActivity({
 
 function TypingActivity({
   game,
-  onFinish
+  onFinish,
+  formatText,
+  onSpeak
 }: {
   game: GameData;
   onFinish: (result: { correct: number; wrong: number }) => void;
+  formatText: (text: string) => string;
+  onSpeak: (text: string) => void;
 }) {
   const prompts = game.content.prompts || [];
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -403,7 +455,12 @@ function TypingActivity({
       {prompts.map((prompt: any) => (
         <div className="tile animate-in" key={prompt.id}>
           <label className="field">
-            <span>{prompt.question}</span>
+            <span className="prompt-line">
+              <span>{formatText(prompt.question || "")}</span>
+              <button className="button ghost compact-button" type="button" onClick={() => onSpeak(prompt.question || "")}>
+                <Volume2 size={18} /> Escoltar
+              </button>
+            </span>
             <input
               value={answers[prompt.id] || ""}
               onChange={(event) => setAnswers({ ...answers, [prompt.id]: event.target.value })}
@@ -419,12 +476,79 @@ function TypingActivity({
   );
 }
 
-function WordSearchActivity({
+function LetterFillActivity({
   game,
-  onFinish
+  onFinish,
+  formatText,
+  onSpeak
 }: {
   game: GameData;
   onFinish: (result: { correct: number; wrong: number }) => void;
+  formatText: (text: string) => string;
+  onSpeak: (text: string) => void;
+}) {
+  const prompts = game.content.prompts || [];
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const accentSensitive = Boolean(game.content.settings?.accentSensitive);
+
+  function check() {
+    let correct = 0;
+    prompts.forEach((prompt: any) => {
+      const expectedAnswers = prompt.acceptedAnswers?.length ? prompt.acceptedAnswers : [prompt.word];
+      const given = normalizeAnswer(answers[prompt.id] || "", accentSensitive);
+      const accepted = expectedAnswers.map((answer: string) => normalizeAnswer(answer, accentSensitive));
+      if (accepted.includes(given)) correct++;
+    });
+    onFinish({ correct, wrong: prompts.length - correct });
+  }
+
+  return (
+    <div className="letter-fill-list">
+      {prompts.map((prompt: any) => {
+        const word = String(prompt.word || prompt.acceptedAnswers?.[0] || "");
+        const pattern = String(prompt.pattern || word);
+        const isCopyMode = prompt.mode === "copy" || pattern === word;
+
+        return (
+          <div className="tile letter-fill-card animate-in" key={prompt.id}>
+            <div className="letter-fill-head">
+              <div>
+                <span className="eyebrow">{isCopyMode ? "Copia la paraula" : "Omple les lletres"}</span>
+                <div className="letter-pattern">{formatText(pattern)}</div>
+              </div>
+              <button className="button ghost compact-button" type="button" onClick={() => onSpeak(word || pattern)}>
+                <Volume2 size={18} /> Escoltar
+              </button>
+            </div>
+            <label className="field">
+              <span>Resposta</span>
+              <input
+                value={answers[prompt.id] || ""}
+                onChange={(event) => setAnswers({ ...answers, [prompt.id]: event.target.value })}
+                placeholder={isCopyMode ? "Copia aquí" : "Escriu la paraula sencera"}
+                autoComplete="off"
+              />
+            </label>
+          </div>
+        );
+      })}
+      <button className="button" onClick={check}>
+        <Check size={18} /> Comprova
+      </button>
+    </div>
+  );
+}
+
+function WordSearchActivity({
+  game,
+  onFinish,
+  formatText,
+  onSpeak
+}: {
+  game: GameData;
+  onFinish: (result: { correct: number; wrong: number }) => void;
+  formatText: (text: string) => string;
+  onSpeak: (text: string) => void;
 }) {
   const grid: string[] = game.content.grid || [];
   const words: Array<{ id: string; word: string }> = game.content.words || [];
@@ -479,9 +603,14 @@ function WordSearchActivity({
       <aside className="word-list">
         <h3>Paraules</h3>
         {words.map((item) => (
-          <span className={`word-chip ${found.includes(item.id) ? "found" : ""}`} key={item.id}>
-            {item.word}
-          </span>
+          <button
+            className={`word-chip ${found.includes(item.id) ? "found" : ""}`}
+            key={item.id}
+            type="button"
+            onClick={() => onSpeak(item.word)}
+          >
+            <Volume2 size={14} /> {formatText(item.word)}
+          </button>
         ))}
       </aside>
 

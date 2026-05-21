@@ -14,6 +14,7 @@ function typeLabel(type: string) {
   if (type === "matching") return "Relacionar";
   if (type === "fill_blanks") return "Omplir buits";
   if (type === "word_search") return "Sopa de lletres";
+  if (type === "letter_fill") return "Omplir lletres";
   return "Escriure";
 }
 

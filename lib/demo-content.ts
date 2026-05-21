@@ -65,5 +65,14 @@ export const demoGameContent = {
     settings: { timeLimitSeconds: 120 },
     grid: generateWordSearchGrid(demoWordSearchWords),
     words: demoWordSearchWords
+  },
+  letter_fill: {
+    instructions: "Completa les lletres que falten o copia la paraula.",
+    settings: { timeLimitSeconds: 90, accentSensitive: false },
+    prompts: [
+      { id: "letter-1", word: "CASA", pattern: "C_SA", acceptedAnswers: ["CASA"] },
+      { id: "letter-2", word: "GAT", pattern: "G_T", acceptedAnswers: ["GAT"] },
+      { id: "letter-3", word: "PEIX", pattern: "PEIX", mode: "copy", acceptedAnswers: ["PEIX"] }
+    ]
   }
 };

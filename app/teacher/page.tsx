@@ -420,6 +420,7 @@ export default async function TeacherPage() {
                   <option value="fill_blanks">Omplir buits</option>
                   <option value="basic_typing">Escriure</option>
                   <option value="word_search">Sopa de lletres</option>
+                  <option value="letter_fill">Omplir lletres / copiar</option>
                 </select>
               </div>
               <div className="field">
@@ -475,13 +476,15 @@ export default async function TeacherPage() {
                     required
                     placeholder={`TITOL: Animals
 ASSIGNATURA: Llengua
-TIPO: word_search
+TIPO: letter_fill
 CURSOS: 1-3
 DIFICULTAT: easy
 TIEMPO: 120
-INSTRUCCIONES: Troba les paraules amagades.
-PARAULES:
-GAT, PEIX, DOFI, OS, CASA`}
+INSTRUCCIONES: Completa les lletres que falten.
+LLETRES:
+C_SA=CASA
+G_T=GAT
+PE_X=PEIX`}
                   />
                 </div>
                 <button className="button secondary" type="submit">

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { generateWordSearchGrid, normalizeWordSearchWord } from "@/lib/word-search";
 
-const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search"] as const;
+const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search", "letter_fill"] as const;
 const difficulties = ["easy", "medium", "hard"] as const;
 
 export const aiGamePrompt = `Actua como diseñador de actividades educativas para primaria.
@@ -9,7 +9,7 @@ Crea UNA actividad para AFAJICS en JSON valido, sin markdown, sin comentarios y 
 
 Reglas:
 - Publico: alumnos de primaria.
-- Tipos permitidos: matching, fill_blanks, basic_typing, word_search.
+- Tipos permitidos: matching, fill_blanks, basic_typing, word_search, letter_fill.
 - Usa instrucciones cortas, claras y adecuadas para niños.
 - Devuelve solo JSON valido.
 
@@ -17,7 +17,7 @@ Formato obligatorio:
 {
   "title": "Titulo del juego",
   "subject": "Asignatura",
-  "type": "matching | fill_blanks | basic_typing | word_search",
+  "type": "matching | fill_blanks | basic_typing | word_search | letter_fill",
   "gradeMin": 1,
   "gradeMax": 6,
   "difficulty": "easy | medium | hard",
@@ -68,6 +68,16 @@ La plataforma pot generar la graella automaticament si envies "words" sense "gri
 També pots enviar una graella ja feta:
 {
   "grid": ["GATXX", "AOPXX", "TSEIX", "XXDOF", "XXIXX"]
+}
+
+Si type es "letter_fill", content debe ser:
+{
+  "instructions": "Completa les lletres que falten.",
+  "settings": { "timeLimitSeconds": 90, "accentSensitive": false },
+  "prompts": [
+    { "id": "letter-1", "word": "CASA", "pattern": "C_SA", "acceptedAnswers": ["CASA"] },
+    { "id": "letter-2", "word": "GAT", "pattern": "GAT", "mode": "copy", "acceptedAnswers": ["GAT"] }
+  ]
 }`;
 
 const baseImportSchema = z.object({
@@ -148,7 +158,7 @@ function parseStructuredText(raw: string) {
     if (fieldMatch) {
       const key = normalizeKey(fieldMatch[1]);
       const value = fieldMatch[2].trim();
-      if (["pares", "preguntas", "respuestas", "banco", "graella", "palabras", "paraules"].includes(key)) {
+      if (["pares", "preguntas", "respuestas", "banco", "graella", "palabras", "paraules", "paraules_a_copiar", "lletres"].includes(key)) {
         currentSection = key;
         sections.set(currentSection, value ? [value] : []);
       } else {
@@ -247,6 +257,32 @@ function parseStructuredText(raw: string) {
     };
   }
 
+  if (type === "letter_fill") {
+    const prompts = (sections.get("lletres") || sections.get("paraules_a_copiar") || [])
+      .map((line, index) => {
+        const [patternOrWord, answer] = line.split(/\s*=\s*/);
+        const value = (answer || patternOrWord || "").trim().toUpperCase();
+        const pattern = (patternOrWord || value).trim().toUpperCase();
+        return {
+          id: `letter-${index + 1}`,
+          word: value,
+          pattern,
+          mode: pattern.includes("_") ? "fill" : "copy",
+          acceptedAnswers: [value]
+        };
+      })
+      .filter((item) => item.word);
+
+    return {
+      ...base,
+      content: {
+        instructions: fields.get("instrucciones") || fields.get("instruccions") || "Completa les lletres que falten.",
+        settings: { timeLimitSeconds: base.estimatedTimeSeconds, accentSensitive: false },
+        prompts
+      }
+    };
+  }
+
   const prompts = (sections.get("preguntas") || []).map((line, index) => {
     const [question, answers] = line.split(/\s*=\s*/);
     return {
@@ -298,6 +334,13 @@ function validateContent(game: ImportedGame) {
     }
   }
 
+  if (game.type === "letter_fill") {
+    const prompts = game.content.prompts;
+    if (!Array.isArray(prompts) || prompts.length < 1) {
+      throw new Error("Una activitat de lletres necessita almenys una paraula.");
+    }
+  }
+
   if (game.type === "word_search") {
     const grid = game.content.grid;
     const words = game.content.words;
@@ -321,6 +364,7 @@ function normalizeType(value: string) {
   if (!normalized) return "";
   if (["huecos", "fill_blanks", "llenar_huecos"].includes(normalized)) return "fill_blanks";
   if (["escribir", "basic_typing", "escritura"].includes(normalized)) return "basic_typing";
+  if (["lletres", "omplir_lletres", "copiar_paraules", "copiar_palabras", "letter_fill"].includes(normalized)) return "letter_fill";
   if (
     [
       "sopa",
@@ -341,6 +385,7 @@ function inferStructuredType(fields: Map<string, string>, sections: Map<string, 
   const explicit = normalizeType(fields.get("tipo") || fields.get("tipus") || fields.get("type") || "");
   if (explicit) return explicit;
   if (sections.has("paraules") || sections.has("palabras") || sections.has("graella")) return "word_search";
+  if (sections.has("lletres") || sections.has("paraules_a_copiar")) return "letter_fill";
   if (sections.has("preguntas")) return "basic_typing";
   if (sections.has("respuestas") || sections.has("banco")) return "fill_blanks";
   return "matching";

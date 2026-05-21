@@ -202,7 +202,7 @@ export async function createStudentAction(formData: FormData) {
 const gameSchema = z.object({
   title: z.string().min(3).max(180),
   subject: z.string().min(2).max(80),
-  type: z.enum(["matching", "fill_blanks", "basic_typing", "word_search"]),
+  type: z.enum(["matching", "fill_blanks", "basic_typing", "word_search", "letter_fill"]),
   gradeMin: z.coerce.number().min(1).max(6),
   gradeMax: z.coerce.number().min(1).max(6),
   difficulty: z.enum(["easy", "medium", "hard"])
