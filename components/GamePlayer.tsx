@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Sparkles, Trophy, Volume2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Check, Clock, Maximize2, Medal, Minimize2, Music, Sparkles, Trophy, Volume2 } from "lucide-react";
 import { saveAttemptAction } from "@/lib/actions";
 import { playUiSound, speakText, warmVoices } from "@/lib/client-audio";
 import { normalizeAnswer } from "@/lib/scoring";
@@ -66,6 +66,8 @@ export function GamePlayer({
   const [elapsedSeconds, setElapsedSeconds] = useState(1);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(true);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
 
   const totalItems = useMemo(() => getTotalItems(game), [game]);
   const timeSpentSeconds = started ? elapsedSeconds : 1;
@@ -86,7 +88,29 @@ export function GamePlayer({
 
   useEffect(() => {
     warmVoices();
+    const music = new Audio("/assets/jic-game-music.mp3");
+    music.loop = true;
+    music.volume = 0.18;
+    musicRef.current = music;
+    return () => {
+      music.pause();
+      musicRef.current = null;
+    };
   }, []);
+
+  useEffect(() => {
+    const music = musicRef.current;
+    if (!music) {
+      return;
+    }
+
+    if (musicEnabled && (countdown !== null || (started && !finished))) {
+      void music.play().catch(() => undefined);
+      return;
+    }
+
+    music.pause();
+  }, [countdown, finished, musicEnabled, started]);
 
   useEffect(() => {
     if (!started || !startedAt || finished) {
@@ -130,14 +154,21 @@ export function GamePlayer({
   }, [countdown, instructions]);
 
   function start() {
+    setMusicEnabled(true);
+    void musicRef.current?.play().catch(() => undefined);
     setCountdown(3);
   }
 
   function finish(result: { correct: number; wrong: number }) {
     playUiSound(result.wrong === 0 ? "complete" : "error");
+    musicRef.current?.pause();
     setCorrectAnswers(result.correct);
     setWrongAnswers(result.wrong);
     setFinished(true);
+  }
+
+  function toggleMusic() {
+    setMusicEnabled((current) => !current);
   }
 
   async function toggleFullscreen() {
@@ -255,6 +286,9 @@ export function GamePlayer({
           <span className="badge orange">
             <Clock size={14} /> {timeSpentSeconds}s
           </span>
+          <button className="button ghost compact-button" type="button" onClick={toggleMusic}>
+            <Music size={18} /> {musicEnabled ? "Pausar música" : "Música"}
+          </button>
           <button className="button ghost compact-button" type="button" onClick={toggleFullscreen}>
             {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             {isFullscreen ? "Sortir" : "Pantalla completa"}
