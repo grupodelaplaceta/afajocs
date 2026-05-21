@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { generateWordSearchGrid, normalizeWordSearchWord } from "@/lib/word-search";
+import {
+  ensureWordSearchGrid,
+  normalizeWordSearchWord,
+  wordSearchGridContainsAll
+} from "@/lib/word-search";
 
 const gameTypes = ["matching", "fill_blanks", "basic_typing", "word_search", "letter_fill"] as const;
 const difficulties = ["easy", "medium", "hard"] as const;
@@ -138,7 +142,7 @@ function ensureGeneratedWordSearchGrid(game: ImportedGame): ImportedGame {
     content: {
       ...game.content,
       words,
-      grid: existingGrid.length ? existingGrid : generateWordSearchGrid(words)
+      grid: ensureWordSearchGrid(words, existingGrid)
     }
   };
 }
@@ -251,7 +255,7 @@ function parseStructuredText(raw: string) {
       content: {
         instructions: fields.get("instrucciones") || fields.get("instruccions") || "Troba les paraules amagades.",
         settings: { timeLimitSeconds: base.estimatedTimeSeconds },
-        grid: grid.length ? grid : generateWordSearchGrid(words),
+        grid: ensureWordSearchGrid(words, grid),
         words
       }
     };
@@ -346,6 +350,9 @@ function validateContent(game: ImportedGame) {
     const words = game.content.words;
     if (!Array.isArray(grid) || grid.length < 3 || !Array.isArray(words) || words.length < 1) {
       throw new Error("Una sopa de lletres necessita una graella i paraules.");
+    }
+    if (!wordSearchGridContainsAll(grid as string[], words as any)) {
+      throw new Error("La sopa de lletres ha de contenir totes les paraules.");
     }
   }
 }

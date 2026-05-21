@@ -1,7 +1,7 @@
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 type WordEntry = {
-  id: string;
+  id?: string;
   word: string;
 };
 
@@ -27,21 +27,70 @@ export function normalizeWordSearchWord(value: string) {
 
 export function generateWordSearchGrid(words: WordEntry[], requestedSize?: number) {
   const cleanWords = words
-    .map((entry) => ({ ...entry, word: normalizeWordSearchWord(entry.word) }))
+    .map((entry) => ({ ...entry, word: normalizeWordSearchWord(String(entry.word || entry)) }))
     .filter((entry) => entry.word.length > 1)
     .sort((a, b) => b.word.length - a.word.length);
 
   const longest = cleanWords[0]?.word.length || 6;
-  const size = Math.max(requestedSize || 0, longest + 2, 8);
-  const grid = Array.from({ length: size }, () => Array.from({ length: size }, () => ""));
+  const baseSize = Math.max(requestedSize || 0, longest + 2, 8);
+  const maxSize = Math.max(baseSize + 14, longest + cleanWords.length * 2, 12);
 
-  cleanWords.forEach((entry, wordIndex) => {
-    const placed = placeWord(grid, entry.word, wordIndex);
-    if (!placed) {
-      placeWord(grid, entry.word, wordIndex + 17, true);
+  for (let size = baseSize; size <= maxSize; size++) {
+    const grid = Array.from({ length: size }, () => Array.from({ length: size }, () => ""));
+    const allPlaced = cleanWords.every((entry, wordIndex) => {
+      const placed = placeWord(grid, entry.word, wordIndex);
+      return placed || placeWord(grid, entry.word, wordIndex + 17, true);
+    });
+
+    if (allPlaced) {
+      return fillGrid(grid);
     }
-  });
+  }
 
+  throw new Error("No s'ha pogut generar una sopa de lletres amb totes les paraules.");
+}
+
+export function ensureWordSearchGrid(words: WordEntry[], existingGrid?: string[], requestedSize?: number) {
+  const cleanWords = words
+    .map((entry, index) => ({
+      id: entry.id || `word-${index + 1}`,
+      word: normalizeWordSearchWord(String(entry.word || entry))
+    }))
+    .filter((entry) => entry.word.length > 1);
+  const cleanGrid = normalizeGrid(existingGrid || []);
+
+  if (cleanGrid.length && wordSearchGridContainsAll(cleanGrid, cleanWords)) {
+    return cleanGrid;
+  }
+
+  return generateWordSearchGrid(cleanWords, requestedSize || cleanGrid.length || undefined);
+}
+
+export function wordSearchGridContainsAll(grid: string[], words: WordEntry[]) {
+  return words.every((entry) => wordSearchGridContainsWord(grid, entry.word));
+}
+
+export function wordSearchGridContainsWord(grid: string[], word: string) {
+  const cleanGrid = normalizeGrid(grid);
+  const cleanWord = normalizeWordSearchWord(word);
+
+  if (!cleanWord || !cleanGrid.length) {
+    return false;
+  }
+
+  for (let row = 0; row < cleanGrid.length; row++) {
+    for (let col = 0; col < cleanGrid[row].length; col++) {
+      if (directions.some(([rowStep, colStep]) => hasWordAt(cleanGrid, cleanWord, row, col, rowStep, colStep))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function fillGrid(grid: string[][]) {
+  const size = grid.length;
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       if (!grid[row][col]) {
@@ -51,6 +100,36 @@ export function generateWordSearchGrid(words: WordEntry[], requestedSize?: numbe
   }
 
   return grid.map((row) => row.join(""));
+}
+
+function normalizeGrid(grid: string[]) {
+  return grid.map((row) => String(row).replace(/\s+/g, "").toUpperCase()).filter(Boolean);
+}
+
+function hasWordAt(
+  grid: string[],
+  word: string,
+  row: number,
+  col: number,
+  rowStep: number,
+  colStep: number
+) {
+  const endRow = row + rowStep * (word.length - 1);
+  const endCol = col + colStep * (word.length - 1);
+
+  if (endRow < 0 || endRow >= grid.length || endCol < 0 || endCol >= grid[endRow].length) {
+    return false;
+  }
+
+  for (let index = 0; index < word.length; index++) {
+    const currentRow = row + rowStep * index;
+    const currentCol = col + colStep * index;
+    if (grid[currentRow]?.[currentCol] !== word[index]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function placeWord(grid: string[][], word: string, seed: number, force = false) {

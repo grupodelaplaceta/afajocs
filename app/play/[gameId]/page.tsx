@@ -5,6 +5,7 @@ import { connectDb } from "@/lib/db";
 import { Game, Student } from "@/lib/models";
 import { GamePlayer } from "@/components/GamePlayer";
 import { getGameRecordViews } from "@/lib/record-views";
+import { ensureWordSearchGrid } from "@/lib/word-search";
 
 function asPlain(value: unknown): any {
   return JSON.parse(JSON.stringify(value));
@@ -40,8 +41,29 @@ export default async function PlayPage({ params }: { params: Promise<{ gameId: s
     }
   }
 
+  let playableGame: any = game;
+
+  if (game.type === "word_search") {
+    const content = (game as any).content || {};
+    const words = Array.isArray(content.words) ? content.words : [];
+    const currentGrid = Array.isArray(content.grid) ? content.grid : [];
+    const repairedGrid = ensureWordSearchGrid(words, currentGrid);
+
+    if (JSON.stringify(repairedGrid) !== JSON.stringify(currentGrid)) {
+      await Game.updateOne({ _id: game._id }, { $set: { "content.grid": repairedGrid } });
+    }
+
+    playableGame = {
+      ...game,
+      content: {
+        ...content,
+        grid: repairedGrid
+      }
+    };
+  }
+
   const recordViews = await getGameRecordViews(gameId, teacherId, defaultStudentId || undefined);
-  const data = asPlain({ game, students, recordViews });
+  const data = asPlain({ game: playableGame, students, recordViews });
   const backHref =
     session?.role === "teacher" ? "/teacher" : session?.role === "student" ? "/student" : "/games";
 
