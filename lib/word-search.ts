@@ -7,9 +7,13 @@ type WordEntry = {
 
 const directions = [
   [0, 1],
+  [0, -1],
   [1, 0],
+  [-1, 0],
   [1, 1],
-  [-1, 1]
+  [1, -1],
+  [-1, 1],
+  [-1, -1]
 ] as const;
 
 export function normalizeWordSearchWord(value: string) {
@@ -87,4 +91,3 @@ function canPlace(grid: string[][], word: string, row: number, col: number, rowS
 
   return true;
 }
-

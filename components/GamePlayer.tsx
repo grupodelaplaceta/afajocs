@@ -554,30 +554,38 @@ function WordSearchActivity({
   const words: Array<{ id: string; word: string }> = game.content.words || [];
   const [selected, setSelected] = useState<string[]>([]);
   const [found, setFound] = useState<string[]>([]);
+  const [foundCells, setFoundCells] = useState<string[]>([]);
 
-  const selectedWord = selected
-    .map((key) => {
-      const [row, col] = key.split("-").map(Number);
-      return grid[row]?.[col] || "";
-    })
-    .join("");
+  const selectedWord = readSelectedWord(selected, grid);
+
+  useEffect(() => {
+    if (!selected.length) {
+      return;
+    }
+
+    const match = findSelectedWordMatch(selectedWord, words, found);
+    if (!match) {
+      return;
+    }
+
+    setFound((current) => [...current, match.id]);
+    setFoundCells((current) => Array.from(new Set([...current, ...selected])));
+    const timeoutId = window.setTimeout(() => setSelected([]), 180);
+    return () => window.clearTimeout(timeoutId);
+  }, [found, selected, selectedWord, words]);
 
   function toggleCell(row: number, col: number) {
     const key = `${row}-${col}`;
-    setSelected((current) =>
-      current.includes(key) ? current.filter((item) => item !== key) : [...current, key]
-    );
-  }
-
-  function markWord() {
-    const normalized = normalizeAnswer(selectedWord);
-    const match = words.find(
-      (item) => !found.includes(item.id) && normalizeAnswer(item.word) === normalized
-    );
-    if (match) {
-      setFound([...found, match.id]);
-      setSelected([]);
+    if (foundCells.includes(key)) {
+      return;
     }
+
+    setSelected((current) => {
+      if (current.includes(key)) {
+        return current.filter((item) => item !== key);
+      }
+      return [...current, key];
+    });
   }
 
   return (
@@ -588,7 +596,9 @@ function WordSearchActivity({
             const key = `${rowIndex}-${colIndex}`;
             return (
               <button
-                className={`letter-cell ${selected.includes(key) ? "selected" : ""}`}
+                className={`letter-cell ${selected.includes(key) ? "selected" : ""} ${
+                  foundCells.includes(key) ? "found" : ""
+                }`}
                 key={key}
                 type="button"
                 onClick={() => toggleCell(rowIndex, colIndex)}
@@ -615,9 +625,7 @@ function WordSearchActivity({
       </aside>
 
       <div className="toolbar" style={{ justifyContent: "flex-start" }}>
-        <button className="button cyan" type="button" onClick={markWord} disabled={!selected.length}>
-          Marcar paraula: {selectedWord || "..."}
-        </button>
+        <span className="badge cyan">Detecta automàticament: {selectedWord || "tria lletres"}</span>
         <button
           className="button"
           type="button"
@@ -628,4 +636,36 @@ function WordSearchActivity({
       </div>
     </div>
   );
+}
+
+function readSelectedWord(selected: string[], grid: string[]) {
+  return selected
+    .map((key) => {
+      const [row, col] = key.split("-").map(Number);
+      return grid[row]?.[col] || "";
+    })
+    .join("");
+}
+
+function findSelectedWordMatch(
+  selectedWord: string,
+  words: Array<{ id: string; word: string }>,
+  found: string[]
+) {
+  const normalized = normalizeAnswer(selectedWord);
+  const reversed = normalizeAnswer(selectedWord.split("").reverse().join(""));
+  const unordered = sortLetters(normalized);
+
+  return words.find((item) => {
+    if (found.includes(item.id)) {
+      return false;
+    }
+
+    const word = normalizeAnswer(item.word);
+    return normalized === word || reversed === word || unordered === sortLetters(word);
+  });
+}
+
+function sortLetters(value: string) {
+  return value.split("").sort().join("");
 }

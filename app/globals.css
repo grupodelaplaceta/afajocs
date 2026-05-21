@@ -968,6 +968,14 @@ p {
   transform: scale(0.96);
 }
 
+.letter-cell.found {
+  background: var(--brand-cyan);
+  border-color: var(--brand-black);
+  color: var(--brand-white);
+  cursor: default;
+  transform: scale(0.94);
+}
+
 .word-list {
   align-content: flex-start;
   background: var(--surface-soft);
