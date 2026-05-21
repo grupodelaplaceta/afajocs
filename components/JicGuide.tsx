@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { Volume2 } from "lucide-react";
 import { speakText, warmVoices } from "@/lib/client-audio";
 
+let lastAutoSpeechAt = 0;
+
 type Props = {
   title?: string;
   message: string;
@@ -14,7 +16,18 @@ type Props = {
 export function JicGuide({ title = "Soc en Jic", message, tone = "purple", compact = false }: Props) {
   useEffect(() => {
     warmVoices();
-  }, []);
+    const now = Date.now();
+    if (now - lastAutoSpeechAt < 3500) {
+      return;
+    }
+
+    lastAutoSpeechAt = now;
+    const timeoutId = window.setTimeout(() => {
+      speakText(`${title}. ${message}`, "jic");
+    }, compact ? 450 : 700);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [compact, message, title]);
 
   function speak() {
     speakText(`${title}. ${message}`, "jic");

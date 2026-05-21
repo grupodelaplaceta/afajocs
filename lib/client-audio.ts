@@ -17,13 +17,13 @@ export function speakText(text: string, role: SpeechRole = "statement") {
   utterance.voice = pickVoice(role);
 
   if (role === "jic") {
-    utterance.rate = 0.94;
-    utterance.pitch = 1.18;
+    utterance.rate = 1.08;
+    utterance.pitch = 1.16;
   } else if (role === "word") {
-    utterance.rate = 0.82;
+    utterance.rate = 0.96;
     utterance.pitch = 1.02;
   } else {
-    utterance.rate = 0.88;
+    utterance.rate = 1;
     utterance.pitch = 1;
   }
 
