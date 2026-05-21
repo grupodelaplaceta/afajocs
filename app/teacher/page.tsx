@@ -78,7 +78,9 @@ export default async function TeacherPage() {
           totalScore: { $sum: "$score" },
           attempts: { $sum: 1 },
           avgScore: { $avg: "$score" },
-          bestScore: { $max: "$score" }
+          bestScore: { $max: "$score" },
+          playedGameIds: { $addToSet: "$gameId" },
+          lastPlayedAt: { $max: "$createdAt" }
         }
       }
     ]),
@@ -91,12 +93,37 @@ export default async function TeacherPage() {
 
   const data = asPlain({ classes, students, games, attempts, records, studentStats, challenges });
   const statsByStudent = new Map(data.studentStats.map((stat: any) => [String(stat._id), stat]));
-  const attemptsByStudent = new Map<string, Set<string>>();
-  data.attempts.forEach((attempt: any) => {
-    const studentId = String(attempt.studentId);
-    const gamesSet = attemptsByStudent.get(studentId) || new Set<string>();
-    gamesSet.add(String(attempt.gameId));
-    attemptsByStudent.set(studentId, gamesSet);
+  const classByStudent = new Map<string, any>();
+  data.classes.forEach((group: any) => {
+    (group.studentIds || []).forEach((studentId: string) => {
+      classByStudent.set(String(studentId), group);
+    });
+  });
+  const notebookRows = data.students.map((student: any) => {
+    const stats = statsByStudent.get(student._id) as any;
+    const assigned = data.challenges.filter((challenge: any) =>
+      challenge.studentIds?.some((item: any) => String(item._id) === student._id)
+    );
+    const group = classByStudent.get(student._id);
+    const doneGames = stats?.playedGameIds?.length || 0;
+    return {
+      student,
+      stats,
+      assigned,
+      group,
+      doneGames,
+      pendingChallenges: assigned.filter((challenge: any) =>
+        (challenge.gameIds || []).some((game: any) => !stats?.playedGameIds?.includes(String(game._id)))
+      ).length
+    };
+  });
+  const classSummaries = data.classes.map((group: any) => {
+    const groupStudentIds = new Set((group.studentIds || []).map((id: string) => String(id)));
+    const groupRows = notebookRows.filter((row: any) => groupStudentIds.has(row.student._id));
+    const totalScore = groupRows.reduce((sum: number, row: any) => sum + (row.stats?.totalScore || 0), 0);
+    const attempts = groupRows.reduce((sum: number, row: any) => sum + (row.stats?.attempts || 0), 0);
+    const doneGames = groupRows.reduce((sum: number, row: any) => sum + row.doneGames, 0);
+    return { group, students: groupRows.length, totalScore, attempts, doneGames };
   });
 
   return (
@@ -169,31 +196,112 @@ export default async function TeacherPage() {
           </section>
 
           <section className="tab-panel tab-content tab-quadern panel">
-            <h2>Quadern del professor</h2>
-            <p className="muted">Vista ràpida d'alumnes, punts, Jics fets i deures assignats.</p>
-            <div className="list" style={{ marginTop: 18 }}>
-              {data.students.map((student: { _id: string; name: string; email: string; gradeLevel: number }) => {
-                const stats = statsByStudent.get(student._id) as any;
-                const assigned = data.challenges.filter((challenge: any) =>
-                  challenge.studentIds?.some((item: any) => String(item._id) === student._id)
-                );
-                const doneGames = attemptsByStudent.get(student._id)?.size || 0;
-                return (
-                  <article className="row" key={student._id}>
-                    <div>
-                      <strong>{student.name}</strong>
-                      <div className="muted">{student.email} · {student.gradeLevel}º</div>
-                      <div className="muted">
-                        {stats?.totalScore || 0} punts · {stats?.attempts || 0} partides · {doneGames} Jics fets
+            <div className="row" style={{ border: 0, padding: 0 }}>
+              <div>
+                <h2>Quadern del professor</h2>
+                <p className="muted">Seguiment unificat de punts, grups, Jics, reptes i activitat.</p>
+              </div>
+              <Link className="button cyan" href="/games">
+                <Library size={18} /> Biblioteca de Jics
+              </Link>
+            </div>
+
+            <div className="notebook-summary">
+              <article className="card stat">
+                <h2>{notebookRows.reduce((sum: number, row: any) => sum + (row.stats?.totalScore || 0), 0)}</h2>
+                <p className="muted">Punts totals</p>
+              </article>
+              <article className="card stat cyan">
+                <h2>{notebookRows.reduce((sum: number, row: any) => sum + (row.stats?.attempts || 0), 0)}</h2>
+                <p className="muted">Partides totals</p>
+              </article>
+              <article className="card stat orange">
+                <h2>{data.challenges.length}</h2>
+                <p className="muted">Reptes actius</p>
+              </article>
+              <article className="card stat">
+                <h2>{data.classes.length}</h2>
+                <p className="muted">Grups</p>
+              </article>
+            </div>
+
+            <div className="notebook-grid">
+              <section>
+                <h3>Grups</h3>
+                <div className="class-summary-list">
+                  {classSummaries.map((summary: any) => (
+                    <article className="class-summary-card" key={summary.group._id}>
+                      <div>
+                        <strong>{summary.group.name}</strong>
+                        <p className="muted">{gradeLabel(summary.group)} · {summary.students} alumnes</p>
                       </div>
-                    </div>
-                    <div className="toolbar">
-                      <span className="badge cyan">{assigned.length} reptes</span>
-                      <span className="badge orange">millor {stats?.bestScore || 0}</span>
-                    </div>
-                  </article>
-                );
-              })}
+                      <div className="toolbar">
+                        <span className="score-pill">{summary.totalScore} pts</span>
+                        <span className="time-pill">{summary.doneGames} Jics</span>
+                      </div>
+                    </article>
+                  ))}
+                  {classSummaries.length === 0 && <p className="muted">Encara no hi ha grups creats.</p>}
+                </div>
+              </section>
+
+              <section>
+                <h3>Top alumnat</h3>
+                <div className="record-list">
+                  {[...notebookRows]
+                    .sort((a: any, b: any) => (b.stats?.totalScore || 0) - (a.stats?.totalScore || 0))
+                    .slice(0, 5)
+                    .map((row: any, index: number) => (
+                      <article className="record-row compact-record" key={row.student._id}>
+                        <div className="record-rank">{index + 1}</div>
+                        <div className="record-main">
+                          <strong>{row.student.name}</strong>
+                          <p className="muted">{row.group?.name || "Sense grup"} · {row.doneGames} Jics</p>
+                        </div>
+                        <span className="score-pill">{row.stats?.totalScore || 0} pts</span>
+                      </article>
+                    ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="notebook-table-wrap">
+              <table className="notebook-table">
+                <thead>
+                  <tr>
+                    <th>Alumne</th>
+                    <th>Grup</th>
+                    <th>Curs</th>
+                    <th>Punts</th>
+                    <th>Partides</th>
+                    <th>Jics fets</th>
+                    <th>Millor</th>
+                    <th>Reptes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notebookRows.map((row: any) => (
+                    <tr key={row.student._id}>
+                      <td>
+                        <strong>{row.student.name}</strong>
+                        <span>{row.student.email}</span>
+                      </td>
+                      <td>{row.group?.name || "Sense grup"}</td>
+                      <td>{row.student.gradeLevel}º</td>
+                      <td><span className="score-pill">{row.stats?.totalScore || 0} pts</span></td>
+                      <td>{row.stats?.attempts || 0}</td>
+                      <td>{row.doneGames}</td>
+                      <td>{row.stats?.bestScore || 0}</td>
+                      <td>
+                        <span className={row.pendingChallenges ? "badge orange" : "badge cyan"}>
+                          {row.assigned.length} assignats · {row.pendingChallenges} pendents
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {notebookRows.length === 0 && <p className="muted">Afegeix alumnes per començar el seguiment.</p>}
             </div>
           </section>
 

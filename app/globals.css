@@ -752,6 +752,85 @@ p {
   gap: 10px;
 }
 
+.notebook-summary {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+  margin-top: 18px;
+}
+
+.notebook-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+  margin-top: 18px;
+}
+
+.class-summary-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.class-summary-card {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 86px;
+  padding: 14px;
+}
+
+.compact-record {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.notebook-table-wrap {
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  margin-top: 18px;
+  overflow-x: auto;
+}
+
+.notebook-table {
+  border-collapse: collapse;
+  min-width: 940px;
+  width: 100%;
+}
+
+.notebook-table th,
+.notebook-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.notebook-table th {
+  background: var(--brand-black);
+  color: var(--brand-white);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+}
+
+.notebook-table td:first-child {
+  min-width: 220px;
+}
+
+.notebook-table td:first-child span {
+  color: rgba(16, 16, 20, 0.62);
+  display: block;
+  font-size: 0.9rem;
+  margin-top: 3px;
+}
+
+.notebook-table tbody tr:hover {
+  background: var(--surface-soft);
+}
+
 .record-row {
   align-items: center;
   background: var(--brand-white);
@@ -1143,6 +1222,15 @@ p {
   .record-row {
     align-items: stretch;
     grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .notebook-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .class-summary-card {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .score-pill,
