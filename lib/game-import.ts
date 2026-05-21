@@ -89,10 +89,22 @@ export function parseImportedGame(raw: string): ImportedGame {
     throw new Error("Pega un JSON o texto estructurado para importar el juego.");
   }
 
-  const parsed = trimmed.startsWith("{") ? JSON.parse(trimmed) : parseStructuredText(trimmed);
+  const parsed = normalizeImportedShape(trimmed.startsWith("{") ? JSON.parse(trimmed) : parseStructuredText(trimmed));
   const game = ensureGeneratedWordSearchGrid(baseImportSchema.parse(parsed));
   validateContent(game);
   return game;
+}
+
+function normalizeImportedShape(value: any) {
+  const content = value?.content || {};
+  const type = normalizeType(String(value?.type || ""));
+  const hasWordSearchContent = Array.isArray(content.words) || Array.isArray(content.grid);
+  const inferredType = hasWordSearchContent ? "word_search" : type;
+
+  return {
+    ...value,
+    type: inferredType || value?.type
+  };
 }
 
 function ensureGeneratedWordSearchGrid(game: ImportedGame): ImportedGame {
@@ -151,7 +163,7 @@ function parseStructuredText(raw: string) {
     }
   }
 
-  const type = normalizeType(fields.get("tipo") || fields.get("tipus") || "matching");
+  const type = inferStructuredType(fields, sections);
   const gradeRange = parseGradeRange(fields.get("cursos") || "1-6");
   const base = {
     title: fields.get("titulo") || fields.get("titol") || "Joc importat",
@@ -306,9 +318,31 @@ function normalizeKey(value: string) {
 
 function normalizeType(value: string) {
   const normalized = normalizeKey(value);
+  if (!normalized) return "";
   if (["huecos", "fill_blanks", "llenar_huecos"].includes(normalized)) return "fill_blanks";
   if (["escribir", "basic_typing", "escritura"].includes(normalized)) return "basic_typing";
-  if (["sopa", "sopa_de_lletres", "sopa_de_letras", "word_search"].includes(normalized)) return "word_search";
+  if (
+    [
+      "sopa",
+      "sopa_lletres",
+      "sopa_letras",
+      "sopa_de_lletres",
+      "sopa_de_letras",
+      "word_search",
+      "wordsearch"
+    ].includes(normalized)
+  ) {
+    return "word_search";
+  }
+  return "matching";
+}
+
+function inferStructuredType(fields: Map<string, string>, sections: Map<string, string[]>) {
+  const explicit = normalizeType(fields.get("tipo") || fields.get("tipus") || fields.get("type") || "");
+  if (explicit) return explicit;
+  if (sections.has("paraules") || sections.has("palabras") || sections.has("graella")) return "word_search";
+  if (sections.has("preguntas")) return "basic_typing";
+  if (sections.has("respuestas") || sections.has("banco")) return "fill_blanks";
   return "matching";
 }
 
